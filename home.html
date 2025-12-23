@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STARGRAM - Home</title>
+    <title>STARGRAM</title>
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
@@ -16,16 +16,31 @@
         </div>
     </header>
 
-    <main class="feed" id="feed-container">
-        <div class="loading">Yuklanmoqda...</div>
-    </main>
+    <div class="stories-wrapper">
+        <div class="story-item">
+            <div class="story-ring" style="background: #dbdbdb; position: relative;" onclick="handleMyStoryClick()">
+                <img src="https://via.placeholder.com/150" id="my-story-img">
+                <div class="add-icon" onclick="event.stopPropagation(); window.location.href='stories.html'">+</div>
+            </div>
+            <span>Sizniki</span>
+        </div>
+        <div id="other-stories-container" style="display: flex; gap: 12px;"></div>
+    </div>
 
-    <nav class="bottom-nav">
-        <a href="home.html" class="nav-item active">🏠</a>
-        <a href="search.html" class="nav-item">🔍</a>
-        <a href="reels.html" class="nav-item">🎬</a>
-        <a href="upload.html" class="nav-item">➕</a>
-        <a href="profile.html" class="nav-item">👤</a>
+    <div id="story-viewer" class="story-viewer hidden">
+        <div class="story-progress"><div id="progress-fill"></div></div>
+        <button class="close-story" onclick="closeStory()">✕</button>
+        <video id="story-video" playsinline></video>
+    </div>
+
+    <main class="feed" id="feed-container"></main>
+
+    <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #dbdbdb;">
+        <a href="home.html" style="text-decoration: none; font-size: 24px;">🏠</a>
+        <a href="search.html" style="text-decoration: none; font-size: 24px;">🔍</a>
+        <a href="reels.html" style="text-decoration: none; font-size: 24px;">🎬</a>
+        <a href="upload.html" style="text-decoration: none; font-size: 24px;">➕</a>
+        <a href="profile.html" style="text-decoration: none; font-size: 24px;">👤</a>
     </nav>
 
     <script type="module" src="home.js"></script>

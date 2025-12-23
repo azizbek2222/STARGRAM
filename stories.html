@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hikoya qo'shish - STARGRAM</title>
+    <link rel="stylesheet" href="stories.css">
+</head>
+<body>
+
+    <header class="stories-header">
+        <button onclick="location.href='home.html'" class="close-btn">✕</button>
+        <h3>Hikoya yaratish</h3>
+        <button id="story-upload-btn" class="post-btn">Ulashish</button>
+    </header>
+
+    <div class="stories-container">
+        <div class="video-preview-area">
+            <input type="file" id="story-file" accept="video/*" hidden>
+            <label for="story-file" id="file-label">
+                <div class="upload-circle">🎥</div>
+                <span>Video tanlang</span>
+            </label>
+            <video id="preview-video" controls class="hidden"></video>
+        </div>
+
+        <div class="caption-area">
+            <textarea id="story-caption" placeholder="Hikoya uchun izoh yozing..."></textarea>
+        </div>
+    </div>
+
+    <script type="module" src="stories.js"></script>
+</body>
+</html>

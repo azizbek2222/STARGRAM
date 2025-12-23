@@ -11,10 +11,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app); // Auth ni ishga tushiramiz
+const auth = getAuth(app);
 const db = getDatabase(app);
 
-// Cloudinary ma'lumotlari
 const CLOUD_NAME = "ddpost4ql"; 
 const UPLOAD_PRESET = "stargram_unsigned"; 
 
@@ -25,12 +24,10 @@ const statusText = document.getElementById('status-text');
 
 let currentUser = null;
 
-// Foydalanuvchi tizimga kirganini tekshirish
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
     } else {
-        // Agar tizimga kirmagan bo'lsa, login sahifasiga yo'naltirish
         window.location.href = "index.html";
     }
 });
@@ -38,6 +35,7 @@ onAuthStateChanged(auth, (user) => {
 fileInput.addEventListener('change', (e) => {
     if(e.target.files[0]) {
         document.getElementById('file-name').innerText = e.target.files[0].name;
+        document.getElementById('file-name').style.color = "#0095f6";
     }
 });
 
@@ -50,9 +48,8 @@ uploadBtn.addEventListener('click', async () => {
 
     uploadBtn.disabled = true;
     statusContainer.classList.remove('hidden');
-    statusText.innerText = "Fayl serverga yuklanmoqda...";
+    statusText.innerText = "Fayl yuklanmoqda...";
 
-    // Fayl turini aniqlash (image yoki video)
     const fileType = file.type.split('/')[0]; 
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${fileType}/upload`;
 
@@ -61,7 +58,6 @@ uploadBtn.addEventListener('click', async () => {
     formData.append('upload_preset', UPLOAD_PRESET);
 
     try {
-        // 1. Cloudinary-ga yuklash
         const response = await fetch(cloudinaryUrl, {
             method: 'POST',
             body: formData
@@ -69,9 +65,8 @@ uploadBtn.addEventListener('click', async () => {
         const cloudData = await response.json();
 
         if (cloudData.secure_url) {
-            statusText.innerText = "Ma'lumotlar bazaga saqlanmoqda...";
+            statusText.innerText = "Baza yangilanmoqda...";
 
-            // 2. Firebase Realtime Database-ga saqlash
             const reelsRef = ref(db, 'reels');
             const newReel = push(reelsRef);
             
@@ -79,19 +74,19 @@ uploadBtn.addEventListener('click', async () => {
                 fileUrl: cloudData.secure_url,
                 type: fileType, 
                 caption: caption,
-                userId: currentUser.uid, // Muhim: yuklovchining ID sini saqlaymiz
-                userEmail: currentUser.email, // Qo'shimcha ma'lumot uchun
+                userId: currentUser.uid,
+                userEmail: currentUser.email,
                 timestamp: Date.now()
             });
 
             statusText.innerText = "Muvaffaqiyatli ulashildi!";
             setTimeout(() => window.location.href = "home.html", 1500);
         } else {
-            throw new Error("Yuklashda xatolik yuz berdi");
+            throw new Error("Yuklashda xatolik");
         }
     } catch (error) {
         console.error(error);
-        alert("Xatolik: " + error.message);
+        alert("Xatolik yuz berdi");
         uploadBtn.disabled = false;
         statusContainer.classList.add('hidden');
     }

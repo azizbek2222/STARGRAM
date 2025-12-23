@@ -8,24 +8,28 @@
 </head>
 <body>
 
-    <div class="upload-wrapper">
-        <div class="upload-card">
-            <h1 class="logo">STARGRAM</h1>
-            <p class="title">Media ulashish (Rasm yoki Video)</p>
+    <header class="top-header">
+        <div style="width: 60px;"></div> <h3>Yangi post</h3>
+        <button id="upload-btn" class="share-btn">Ulashish</button>
+    </header>
 
-            <div class="form-group">
-                <input type="file" id="video-file" accept="video/*,image/*" hidden>
-                <label for="video-file" class="file-label">
-                    <div class="upload-icon">📁</div>
-                    <span id="file-name">Faylni tanlang (Rasm/Video)</span>
-                </label>
+    <div class="upload-container">
+        <div class="media-preview-box">
+            <input type="file" id="video-file" accept="video/*,image/*" hidden>
+            <label for="video-file" class="file-label">
+                <div class="icon-circle">
+                    <span class="upload-icon">📸</span>
+                </div>
+                <span id="file-name">Media tanlash</span>
+            </label>
+        </div>
 
-                <textarea id="video-caption" placeholder="Sarlavha yozing..."></textarea>
-                
-                <button id="upload-btn">Ulashish</button>
-            </div>
+        <div class="caption-section">
+            <textarea id="video-caption" placeholder="Sarlavha yozing..."></textarea>
+        </div>
 
-            <div id="status-container" class="hidden">
+        <div id="status-container" class="status-overlay hidden">
+            <div class="status-content">
                 <div class="loader"></div>
                 <p id="status-text">Yuklanmoqda...</p>
             </div>

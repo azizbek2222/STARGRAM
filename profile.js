@@ -31,36 +31,36 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         loadUserProfile(user.uid);
-        loadUserPosts(user.uid); // Postlarni yuklashni chaqiramiz
+        loadUserPosts(user.uid);
     } else {
         window.location.href = "index.html";
     }
 });
 
-// 2. Profil ma'lumotlarini yuklash
+// 2. Profil ma'lumotlarini yuklash (Nishonni ko'rsatish bilan)
 function loadUserProfile(uid) {
     const userRef = ref(db, 'users/' + uid);
     onValue(userRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            usernameEl.innerText = data.username || "foydalanuvchi";
+            // isVerified true bo'lsa, nishon.png ni qo'shadi
+            const badgeHtml = data.isVerified ? `<img src="nishon.png" class="badge-img" alt="verified">` : "";
+            usernameEl.innerHTML = (data.username || "foydalanuvchi") + badgeHtml;
             profileImgEl.src = data.profileImg || "https://via.placeholder.com/150";
         }
     });
 }
 
-// 3. FAQAT joriy foydalanuvchi yuklagan postlarni ko'rsatish
+// 3. Postlarni yuklash
 function loadUserPosts(uid) {
     const reelsRef = ref(db, 'reels');
     onValue(reelsRef, (snapshot) => {
         const data = snapshot.val();
-        postsContainer.innerHTML = ""; // Oldingi postlarni tozalash
+        postsContainer.innerHTML = ""; 
         let count = 0;
 
         if (data) {
-            // Ma'lumotlarni massivga aylantirib, teskari tartibda (yangisi birinchi) aylanamiz
             Object.values(data).reverse().forEach(item => {
-                // MUHIM: Postning userId si joriy foydalanuvchi UID si bilan mosligini tekshiramiz
                 if (item.userId === uid) {
                     count++;
                     const div = document.createElement('div');
@@ -75,16 +75,15 @@ function loadUserPosts(uid) {
                 }
             });
         }
-        postCountEl.innerText = count; // Postlar sonini yangilash
+        postCountEl.innerText = count; 
         
-        // Agar post bo'lmasa xabar chiqarish (ixtiyoriy)
         if (count === 0) {
             postsContainer.innerHTML = `<p style="grid-column: 1/-1; text-align: center; padding: 20px; color: gray;">Hozircha postlaringiz yo'q</p>`;
         }
     });
 }
 
-// 4. Username tahrirlash va tekshirish
+// 4. Tahrirlash
 document.getElementById('edit-btn').onclick = () => {
     editModal.classList.remove('hidden');
     usernameError.style.display = 'none';
@@ -118,7 +117,7 @@ document.getElementById('save-profile').onclick = async () => {
     }
 };
 
-// 5. Profil rasmini yuklash
+// 5. Rasm yuklash
 document.getElementById('avatar-input').onchange = async (e) => {
     const file = e.target.files[0];
     if (!file || !currentUser) return;
@@ -140,6 +139,14 @@ document.getElementById('avatar-input').onchange = async (e) => {
             });
         }
     } catch (error) {
-        console.error("Rasm yuklashda xato:", error);
+        console.error("Xato:", error);
     }
 };
+
+// Sozlamalarga o'tish
+const settingsBtn = document.getElementById('go-to-settings');
+if(settingsBtn) {
+    settingsBtn.onclick = () => {
+        window.location.href = "sozlamalar.html";
+    };
+}

@@ -5,10 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STARGRAM - Profil</title>
     <link rel="stylesheet" href="profile.css">
+    <style>
+        /* Nishon uchun yangilangan kattaroq uslub */
+        .badge-img {
+            width: 32px; /* Kattalashtirildi */
+            height: 32px;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        #display-username {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .settings-btn {
+            position: absolute; 
+            top: 20px; 
+            left: 20px; 
+            font-size: 24px; 
+            cursor: pointer; 
+            z-index: 10;
+        }
+    </style>
 </head>
 <body>
 
     <div class="profile-container">
+        <div class="settings-btn" id="go-to-settings">☰</div>
+
         <header class="profile-header">
             <div class="avatar-section">
                 <input type="file" id="avatar-input" accept="image/*" hidden>

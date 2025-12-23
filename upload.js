@@ -15,7 +15,7 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 const CLOUD_NAME = "ddpost4ql"; 
-const UPLOAD_PRESET = "stargram_unsigned"; 
+const UPLOAD_PRESET = "stargram_uploads"; 
 
 const fileInput = document.getElementById('video-file');
 const uploadBtn = document.getElementById('upload-btn');

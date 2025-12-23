@@ -17,7 +17,6 @@ const resultsContainer = document.getElementById('search-results');
 
 let allUsers = [];
 
-// 1. Barcha foydalanuvchilarni bir marta yuklab olish
 onValue(ref(db, 'users'), (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -28,7 +27,6 @@ onValue(ref(db, 'users'), (snapshot) => {
     }
 });
 
-// 2. Qidiruv funksiyasi
 searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
     resultsContainer.innerHTML = "";
@@ -51,7 +49,6 @@ searchInput.addEventListener('input', (e) => {
                 window.location.href = `user-profile.html?uid=${user.uid}`;
             };
             
-            // Ko'k nishon tekshiruvi va to'g'ri joylashuvi uchun style qo'shildi
             const badge = user.isVerified 
                 ? `<img src="nishon.png" style="width:16px; height:16px; margin-left:5px; object-fit:contain; display:inline-block; vertical-align:middle;">` 
                 : "";

@@ -30,7 +30,35 @@
     <div id="story-viewer" class="story-viewer hidden">
         <div class="story-progress"><div id="progress-fill"></div></div>
         <button class="close-story" onclick="closeStory()">✕</button>
+        
         <video id="story-video" playsinline></video>
+
+        <div class="story-bottom-tools">
+            <div class="tool-left" onclick="toggleStoryLike()">
+                <span id="story-like-btn">🤍</span>
+                <span id="story-like-count">0</span>
+            </div>
+            <div class="tool-right" onclick="openStats()">
+                <span id="story-view-info">👁️ 0</span>
+            </div>
+        </div>
+
+        <div id="story-stats-panel" class="stats-panel hidden">
+            <div class="stats-header">
+                <h4>Ma'lumotlar</h4>
+                <button onclick="closeStats()">✕</button>
+            </div>
+            <div class="stats-content">
+                <div class="stats-section">
+                    <h5>Layklar</h5>
+                    <div id="likes-list"></div>
+                </div>
+                <div class="stats-section">
+                    <h5>Ko'rganlar</h5>
+                    <div id="views-list"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <main class="feed" id="feed-container"></main>

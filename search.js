@@ -46,8 +46,9 @@ searchInput.addEventListener('input', (e) => {
         filtered.forEach(user => {
             const userEl = document.createElement('div');
             userEl.className = 'user-item';
+            userEl.style.cursor = 'pointer';
             userEl.onclick = () => {
-                // Foydalanuvchi profiliga o'tish (UID ni yuboramiz)
+                // Foydalanuvchi profiliga o'tish
                 window.location.href = `user-profile.html?uid=${user.uid}`;
             };
             

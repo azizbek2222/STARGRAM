@@ -48,14 +48,20 @@ searchInput.addEventListener('input', (e) => {
             userEl.className = 'user-item';
             userEl.style.cursor = 'pointer';
             userEl.onclick = () => {
-                // Foydalanuvchi profiliga o'tish
                 window.location.href = `user-profile.html?uid=${user.uid}`;
             };
+            
+            // Ko'k nishon tekshiruvi va to'g'ri joylashuvi uchun style qo'shildi
+            const badge = user.isVerified 
+                ? `<img src="nishon.png" style="width:16px; height:16px; margin-left:5px; object-fit:contain; display:inline-block; vertical-align:middle;">` 
+                : "";
             
             userEl.innerHTML = `
                 <img src="${user.profileImg || 'https://via.placeholder.com/150'}" alt="avatar">
                 <div class="user-info">
-                    <span class="username">${user.username || 'foydalanuvchi'}</span>
+                    <span class="username" style="display: flex; align-items: center; line-height: 1;">
+                        ${user.username || 'foydalanuvchi'}${badge}
+                    </span>
                     <span class="full-name">STARGRAM foydalanuvchisi</span>
                 </div>
             `;

@@ -12,7 +12,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// URL dan foydalanuvchi UID sini olish (masalan: user-profile.html?uid=123)
+// URL dan foydalanuvchi UID sini olish
 const urlParams = new URLSearchParams(window.location.search);
 const targetUid = urlParams.get('uid');
 
@@ -27,17 +27,23 @@ if (targetUid) {
     loadUserPosts();
 } else {
     alert("Foydalanuvchi topilmadi!");
-    window.location.href = "home.html";
 }
 
-// 1. Foydalanuvchi shaxsiy ma'lumotlarini yuklash
+// 1. Foydalanuvchi ma'lumotlarini yuklash
 async function loadUserProfile() {
-    const userRef = ref(db, `users/${targetUid}`);
+    const userRef = ref(db, 'users/' + targetUid);
     const snapshot = await get(userRef);
+
     if (snapshot.exists()) {
         const data = snapshot.val();
-        usernameEl.innerText = data.username || "foydalanuvchi";
-        navUsernameEl.innerText = data.username || "Profil";
+        
+        // Ko'k nishon tekshiruvi
+        const badge = data.isVerified ? `<img src="nishon.png" style="width:20px; margin-left:5px; vertical-align:middle;">` : "";
+        
+        // Username va navigatsiyada ismni nishon bilan chiqarish
+        usernameEl.innerHTML = (data.username || "foydalanuvchi") + badge;
+        navUsernameEl.innerHTML = (data.username || "Profil") + badge;
+        
         if (data.profileImg) profileImgEl.src = data.profileImg;
     }
 }
@@ -52,16 +58,15 @@ function loadUserPosts() {
 
         if (data) {
             Object.values(data).reverse().forEach(item => {
-                // Faqat ushbu foydalanuvchiga tegishli postlarni saralash
                 if (item.userId === targetUid) {
                     count++;
                     const div = document.createElement('div');
                     div.className = 'grid-item';
                     
                     if (item.type === 'video') {
-                        div.innerHTML = `<video src="${item.fileUrl}"></video><div class="play-icon">▶</div>`;
+                        div.innerHTML = `<video src="${item.fileUrl || item.videoUrl}"></video><div class="play-icon">▶</div>`;
                     } else {
-                        div.innerHTML = `<img src="${item.fileUrl}">`;
+                        div.innerHTML = `<img src="${item.fileUrl || item.videoUrl}">`;
                     }
                     postsContainer.appendChild(div);
                 }
@@ -69,7 +74,7 @@ function loadUserPosts() {
         }
         postCountEl.innerText = count;
         if (count === 0) {
-            postsContainer.innerHTML = `<p style="grid-column: 1/4; text-align:center; padding: 20px; color: #8e8e8e;">Hozircha postlar yo'q.</p>`;
+            postsContainer.innerHTML = `<p style="grid-column: 1/4; text-align:center; padding: 20px; color: #8e8e8e;">Hozircha postlar yo'q</p>`;
         }
     });
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STARGRAM Login & Register</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="auth-card" id="login-card">
+            <h1 class="logo">STARGRAM</h1>
+            <div class="form-group">
+                <input type="email" id="login-email" placeholder="Email">
+                <input type="password" id="login-password" placeholder="Parol">
+                <button id="login-btn">Kirish</button>
+            </div>
+            <div class="divider">YOKI</div>
+            <p class="toggle-text">Hisobingiz yo'qmi? <span onclick="toggleAuth()">Ro'yxatdan o'ting</span></p>
+        </div>
+
+        <div class="auth-card hidden" id="register-card">
+            <h1 class="logo">STARGRAM</h1>
+            <p class="subtitle">Do'stlaringizni ko'rish uchun ro'yxatdan o'ting.</p>
+            <div class="form-group">
+                <input type="email" id="reg-email" placeholder="Email">
+                <input type="password" id="reg-password" placeholder="Parol">
+                <button id="register-btn">Ro'yxatdan o'tish</button>
+            </div>
+            <p class="toggle-text">Hisobingiz bormi? <span onclick="toggleAuth()">Kirish</span></p>
+        </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+</body>
+</html>

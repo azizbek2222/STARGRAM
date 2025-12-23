@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STARGRAM - Media Yuklash</title>
+    <link rel="stylesheet" href="upload.css">
+</head>
+<body>
+
+    <div class="upload-wrapper">
+        <div class="upload-card">
+            <h1 class="logo">STARGRAM</h1>
+            <p class="title">Media ulashish (Rasm yoki Video)</p>
+
+            <div class="form-group">
+                <input type="file" id="video-file" accept="video/*,image/*" hidden>
+                <label for="video-file" class="file-label">
+                    <div class="upload-icon">📁</div>
+                    <span id="file-name">Faylni tanlang (Rasm/Video)</span>
+                </label>
+
+                <textarea id="video-caption" placeholder="Sarlavha yozing..."></textarea>
+                
+                <button id="upload-btn">Ulashish</button>
+            </div>
+
+            <div id="status-container" class="hidden">
+                <div class="loader"></div>
+                <p id="status-text">Yuklanmoqda...</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item">🏠</a>
+        <a href="search.html" class="nav-item">🔍</a>
+        <a href="reels.html" class="nav-item">🎬</a>
+        <a href="upload.html" class="nav-item active">➕</a>
+        <a href="profile.html" class="nav-item">👤</a>
+    </nav>
+
+    <script type="module" src="upload.js"></script>
+</body>
+</html>

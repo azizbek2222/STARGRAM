@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STARGRAM - Profil</title>
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+
+    <div class="profile-container">
+        <header class="profile-header">
+            <div class="avatar-section">
+                <input type="file" id="avatar-input" accept="image/*" hidden>
+                <label for="avatar-input">
+                    <img src="https://via.placeholder.com/150" id="profile-img" alt="Avatar">
+                    <div class="change-photo-overlay">O'zgartirish</div>
+                </label>
+            </div>
+            
+            <div class="stats-section">
+                <div class="username-row">
+                    <h2 id="display-username">foydalanuvchi</h2>
+                    <button id="edit-btn">Tahrirlash</button>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item"><b id="post-count">0</b><span>postlar</span></div>
+                    <div class="stat-item"><b>125</b><span>obunachilar</span></div>
+                    <div class="stat-item"><b>180</b><span>obunalar</span></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="profile-bio">
+            <p id="user-bio">Mening STARGRAM profilim 🚀</p>
+        </div>
+
+        <div id="edit-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Profilni tahrirlash</h3>
+                <div class="input-group">
+                    <input type="text" id="new-username" placeholder="Yangi username">
+                    <p id="username-error" style="color: #ed4956; font-size: 13px; margin-top: 8px; display: none; font-weight: 500;">
+                        Bu foydalanuvchi nomi band!
+                    </p>
+                </div>
+                <div class="modal-btns">
+                    <button id="save-profile">Saqlash</button>
+                    <button id="close-modal">Yopish</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <div class="tab active">▦ POSTLAR</div>
+            <div class="tab">🎬 REELSLAR</div>
+        </div>
+
+        <div class="posts-grid" id="profile-posts">
+            </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item">🏠</a>
+        <a href="search.html" class="nav-item">🔍</a>
+        <a href="reels.html" class="nav-item">🎬</a>
+        <a href="upload.html" class="nav-item">➕</a>
+        <a href="profile.html" class="nav-item active">👤</a>
+    </nav>
+
+    <script type="module" src="profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STARGRAM - Reels</title>
+    <link rel="stylesheet" href="reels.css">
+</head>
+<body>
+
+    <div class="reels-container" id="reels-container">
+        <div class="loading">Reels yuklanmoqda...</div>
+    </div>
+
+    <div id="comment-modal" class="comment-modal hidden">
+        <div class="comment-content">
+            <div class="comment-header">
+                <span>Izohlar</span>
+                <button id="close-comments">✕</button>
+            </div>
+            <div id="comments-list" class="comments-list"></div>
+            <div class="comment-input-area">
+                <input type="text" id="comment-text" placeholder="Izoh qoldiring...">
+                <button id="send-comment">Yuborish</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item">🏠</a>
+        <a href="search.html" class="nav-item">🔍</a>
+        <a href="reels.html" class="nav-item active">🎬</a>
+        <a href="upload.html" class="nav-item">➕</a>
+        <a href="profile.html" class="nav-item">👤</a>
+    </nav>
+
+    <script type="module" src="reels.js"></script>
+</body>
+</html>

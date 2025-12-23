@@ -1,0 +1,26 @@
+body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+.reels-container { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; }
+.reel-video-wrapper { position: relative; height: 100vh; width: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; }
+video { width: 100%; height: 100%; object-fit: cover; }
+
+.reel-actions { position: absolute; right: 15px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; align-items: center; color: white; z-index: 10; }
+.action-btn { display: flex; flex-direction: column; align-items: center; font-size: 12px; cursor: pointer; }
+.action-btn span:first-child { font-size: 30px; transition: 0.2s; }
+.liked { color: #ff3040; }
+
+.reel-info { position: absolute; left: 15px; bottom: 100px; color: white; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); z-index: 10; }
+
+/* Comment Modal */
+.comment-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 60%; background: white; border-radius: 15px 15px 0 0; z-index: 100; transition: 0.3s transform; }
+.comment-modal.hidden { transform: translateY(100%); display: block !important; }
+.comment-content { display: flex; flex-direction: column; height: 100%; }
+.comment-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: bold; }
+.comments-list { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; }
+.comment-item { margin-bottom: 10px; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px; }
+.comment-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+.comment-input-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+.comment-input-area button { background: none; border: none; color: #0095f6; font-weight: bold; cursor: pointer; }
+
+.bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; padding: 15px 0; border-top: 0.5px solid #333; z-index: 50; }
+.nav-item { text-decoration: none; font-size: 24px; color: white; }
+.loading { color: white; text-align: center; padding-top: 50%; }

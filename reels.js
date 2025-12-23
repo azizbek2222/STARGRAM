@@ -28,12 +28,11 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Random qilish funksiyasi
 function shuffle(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-// 2. Reels yuklash (Random va Ovoz bilan)
+// 2. Reels yuklash (Dinamik foydalanuvchi ma'lumotlari bilan)
 async function loadReelsOnce() {
     const reelsRef = ref(db, 'reels');
     const snapshot = await get(reelsRef); 
@@ -44,7 +43,6 @@ async function loadReelsOnce() {
         return;
     }
 
-    // Videolarni random (tasodifiy) tartibda saralash
     let reelsList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
     reelsList = shuffle(reelsList);
 
@@ -53,11 +51,14 @@ async function loadReelsOnce() {
     for (const reel of reelsList) {
         const likes = reel.likesCount || 0;
         
-        let creatorUsername = "user";
+        // Videoni yuklagan odamning eng oxirgi ma'lumotlarini olish
+        let creatorHtml = `@user`;
         if (reel.userId) {
             const creatorSnap = await get(ref(db, `users/${reel.userId}`));
             if (creatorSnap.exists()) {
-                creatorUsername = creatorSnap.val().username || "user";
+                const cData = creatorSnap.val();
+                const badge = cData.isVerified ? `<img src="nishon.png" style="width:16px; margin-left:4px; vertical-align:middle;">` : "";
+                creatorHtml = `@${cData.username || "user"}${badge}`;
             }
         }
 
@@ -77,7 +78,7 @@ async function loadReelsOnce() {
                 </div>
 
                 <div class="reel-info">
-                    <h3>@${creatorUsername}</h3>
+                    <h3>${creatorHtml}</h3>
                     <p>${reel.caption || ''}</p>
                 </div>
             </div>
@@ -107,11 +108,7 @@ function setupAutoPlay() {
         entries.forEach(entry => {
             const video = entry.target.querySelector('video');
             if (entry.isIntersecting) {
-                // Brauzerlar ovozli videoni avtomatik qo'yishga ruxsat bermasligi mumkin, 
-                // shuning uchun catch ishlatamiz.
-                video.play().catch(() => {
-                    console.log("Ovozli video uchun foydalanuvchi harakati kerak.");
-                });
+                video.play().catch(() => {});
             } else {
                 video.pause();
             }
@@ -124,7 +121,7 @@ function setupAutoPlay() {
 window.togglePlay = (video) => {
     if (video.paused) {
         video.play();
-        video.muted = false; // Bosilganda ovozni kafolatlangan holda yoqish
+        video.muted = false;
     } else {
         video.pause();
     }
@@ -132,13 +129,11 @@ window.togglePlay = (video) => {
 
 window.toggleLike = async (reelId, btn) => {
     if (!auth.currentUser) return;
-    
     const heart = document.getElementById(`heart-${reelId}`);
     const countEl = document.getElementById(`count-${reelId}`);
     const uid = auth.currentUser.uid;
     const likeRef = ref(db, `likes/${reelId}/${uid}`);
     const reelLikesRef = ref(db, `reels/${reelId}/likesCount`);
-
     const likeSnap = await get(likeRef);
 
     if (likeSnap.exists()) {
@@ -152,27 +147,36 @@ window.toggleLike = async (reelId, btn) => {
         heart.classList.add('liked');
         await runTransaction(reelLikesRef, (currentCount) => (currentCount || 0) + 1);
     }
-
     const updatedSnap = await get(reelLikesRef);
     countEl.innerText = updatedSnap.val() || 0;
 };
 
+// 3. Izohlar bo'limi (Dinamik foydalanuvchi ma'lumotlari va nishon bilan)
 window.openComments = function(reelId) {
     currentReelId = reelId;
     document.getElementById('comment-modal').classList.remove('hidden');
     const list = document.getElementById('comments-list');
     
-    onValue(ref(db, `reels/${reelId}/comments`), (snap) => {
+    onValue(ref(db, `reels/${reelId}/comments`), async (snap) => {
         list.innerHTML = "";
         const data = snap.val();
         if (data) {
-            Object.values(data).forEach(c => {
+            // Har bir izoh uchun foydalanuvchi ma'lumotlarini qayta tekshiramiz
+            const commentEntries = Object.values(data);
+            for (const c of commentEntries) {
+                const userSnap = await get(ref(db, `users/${c.uid}`));
+                const uData = userSnap.exists() ? userSnap.val() : c; // Agar user o'zgargan bo'lsa bazadagisi, bo'lmasa eski ma'lumot
+                const badge = uData.isVerified ? `<img src="nishon.png" style="width:14px; margin-left:3px; vertical-align:middle;">` : "";
+                
                 list.innerHTML += `
-                    <div class="comment-item">
-                        <img src="${c.userImg || 'https://via.placeholder.com/150'}" style="width:30px; height:30px; border-radius:50%; margin-right:10px; vertical-align:middle; object-fit:cover;">
-                        <b>${c.username}:</b> ${c.text}
+                    <div class="comment-item" style="margin-bottom: 12px; display: flex; align-items: flex-start; gap: 10px;">
+                        <img src="${uData.profileImg || 'https://via.placeholder.com/150'}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                        <div>
+                            <span style="font-weight: bold; font-size: 13px;">${uData.username}${badge}</span>
+                            <p style="margin: 2px 0 0; font-size: 13px;">${c.text}</p>
+                        </div>
                     </div>`;
-            });
+            }
         } else {
             list.innerHTML = "Hozircha izohlar yo'q.";
         }
@@ -186,16 +190,14 @@ document.getElementById('close-comments').onclick = () => {
 document.getElementById('send-comment').onclick = async () => {
     const textInput = document.getElementById('comment-text');
     const text = textInput.value.trim();
-    if (!text || !currentReelId || !currentUserData) return;
+    if (!text || !currentReelId || !auth.currentUser) return;
 
     const commentRef = ref(db, `reels/${currentReelId}/comments`);
     const newComment = push(commentRef);
     
     await set(newComment, {
         text: text,
-        username: currentUserData.username,
-        userImg: currentUserData.profileImg,
-        uid: auth.currentUser.uid,
+        uid: auth.currentUser.uid, // Faqat UID ni saqlaymiz, ma'lumotlarni openComments'da dinamik olamiz
         timestamp: Date.now()
     });
 

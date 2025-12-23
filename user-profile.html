@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STARGRAM - Foydalanuvchi Profili</title>
+    <link rel="stylesheet" href="user-profile.css">
+</head>
+<body>
+
+    <header class="profile-nav">
+        <button onclick="history.back()" class="back-btn">⬅</button>
+        <h2 id="nav-username">Profil</h2>
+        <div></div> </header>
+
+    <div class="profile-container">
+        <header class="profile-header">
+            <div class="avatar-section">
+                <img src="https://via.placeholder.com/150" id="profile-img" alt="Avatar">
+            </div>
+            
+            <div class="stats-section">
+                <div class="username-row">
+                    <h2 id="display-username">yuklanmoqda...</h2>
+                    <button id="follow-btn">Obuna bo'lish</button>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item"><b id="post-count">0</b><span>postlar</span></div>
+                    <div class="stat-item"><b>0</b><span>obunachilar</span></div>
+                    <div class="stat-item"><b>0</b><span>obunalar</span></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="profile-bio">
+            <p id="user-bio">STARGRAM foydalanuvchisi ✨</p>
+        </div>
+
+        <div class="profile-tabs">
+            <div class="tab active">▦ POSTLAR</div>
+        </div>
+
+        <div class="posts-grid" id="user-posts">
+            </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item">🏠</a>
+        <a href="search.html" class="nav-item">🔍</a>
+        <a href="reels.html" class="nav-item">🎬</a>
+        <a href="upload.html" class="nav-item">➕</a>
+        <a href="profile.html" class="nav-item">👤</a>
+    </nav>
+
+    <script type="module" src="user-profile.js"></script>
+</body>
+</html>

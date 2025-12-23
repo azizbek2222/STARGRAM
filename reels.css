@@ -4,7 +4,7 @@ body, html {
     height: 100%; 
     background: #000; 
     overflow: hidden; 
-    font-family: sans-serif; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .reels-container { 
@@ -12,9 +12,12 @@ body, html {
     overflow-y: scroll; 
     scroll-snap-type: y mandatory; 
     scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-/* Videoning ekrandan chiqib ketmasligini ta'minlaydi */
+.reels-container::-webkit-scrollbar { display: none; }
+
 .reel-video-wrapper { 
     position: relative; 
     height: 100vh; 
@@ -29,18 +32,16 @@ body, html {
 video { 
     max-width: 100%; 
     max-height: 100vh; 
-    width: auto; 
-    height: auto; 
-    object-fit: contain; /* Video o'lchamini buzmasdan ekranga joylaydi */
+    object-fit: contain; 
 }
 
 .reel-actions { 
     position: absolute; 
     right: 15px; 
-    bottom: 120px; 
+    bottom: 100px; 
     display: flex; 
     flex-direction: column; 
-    gap: 20px; 
+    gap: 15px; 
     align-items: center; 
     color: white; 
     z-index: 10; 
@@ -50,33 +51,28 @@ video {
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    font-size: 12px; 
     cursor: pointer; 
 }
 
 .action-btn span:first-child { 
-    font-size: 30px; 
-    transition: 0.2s; 
+    font-size: 28px; 
+    margin-bottom: 2px;
 }
 
+.count { font-size: 12px; font-weight: 600; }
 .liked { color: #ff3040; }
 
 .reel-info { 
     position: absolute; 
     left: 15px; 
-    bottom: 100px; 
+    bottom: 90px; 
     color: white; 
-    text-shadow: 1px 1px 5px rgba(0,0,0,0.8); 
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8); 
     z-index: 10; 
     max-width: 80%;
 }
 
-.badge-img {
-    width: 16px;
-    height: 16px;
-    margin-left: 5px;
-    vertical-align: middle;
-}
+.badge-img { width: 16px; height: 16px; margin-left: 5px; vertical-align: middle; }
 
 /* Comment Modal */
 .comment-modal { 
@@ -84,34 +80,60 @@ video {
     bottom: 0; 
     left: 0; 
     width: 100%; 
-    height: 60%; 
+    height: 70%; 
     background: white; 
     border-radius: 15px 15px 0 0; 
     z-index: 100; 
-    transition: 0.3s transform; 
+    transition: transform 0.3s ease-out; 
 }
 
-.comment-modal.hidden { 
-    transform: translateY(100%); 
-    display: block !important; 
-}
+.comment-modal.hidden { transform: translateY(100%); }
 
 .comment-content { display: flex; flex-direction: column; height: 100%; }
-.comment-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: bold; }
-.comments-list { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; }
-.comment-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 10px; padding-bottom: 20px; }
 
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background: #000;
-    display: flex;
-    justify-content: space-around;
-    padding: 15px 0;
-    border-top: 0.5px solid #333;
-    z-index: 20;
+.comment-header { 
+    padding: 15px; 
+    border-bottom: 1px solid #eee; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    font-weight: bold;
 }
 
-.nav-item { text-decoration: none; font-size: 24px; color: white; }
-.nav-item.active { color: #fff; filter: drop-shadow(0 0 5px #fff); }
+#close-comments { background:none; border:none; font-size:22px; cursor:pointer; }
+
+.comments-list { flex: 1; overflow-y: auto; padding: 15px; }
+
+.comment-input-area { 
+    padding: 15px; 
+    border-top: 1px solid #eee; 
+    display: flex; 
+    gap: 10px; 
+}
+
+#comment-text { 
+    flex: 1; 
+    border: 1px solid #dbdbdb; 
+    border-radius: 20px; 
+    padding: 10px 15px; 
+    outline: none; 
+}
+
+#send-comment { background: none; border: none; color: #0095f6; font-weight: bold; cursor: pointer; }
+
+/* Bottom Nav */
+.bottom-nav { 
+    position: fixed; 
+    bottom: 0; 
+    width: 100%; 
+    height: 50px; 
+    background: #000; 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center; 
+    border-top: 0.5px solid #333; 
+    z-index: 100;
+}
+
+.nav-item { text-decoration: none; font-size: 24px; color: white; opacity: 0.6; }
+.nav-item.active { opacity: 1; }

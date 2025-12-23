@@ -17,84 +17,96 @@ const container = document.getElementById('reels-container');
 let currentReelId = null;
 let currentUserData = null;
 
-// 1. Foydalanuvchi holatini tekshirish
+// Videolarni aralashtirish funksiyasi (Random qilish uchun)
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const userSnap = await get(ref(db, `users/${user.uid}`));
         currentUserData = userSnap.val() || {};
-        loadReelsOnce(); 
+        loadReels();
     } else {
         window.location.href = "index.html";
     }
 });
 
-// 2. Reelslarni yuklash va saralash
-async function loadReelsOnce() {
-    const reelsRef = ref(db, 'reels');
-    const snapshot = await get(reelsRef);
-    const data = snapshot.val();
-    
-    if (!data) {
-        container.innerHTML = "<p style='color:white; text-align:center; padding-top:50px;'>Videolar yo'q.</p>";
-        return;
-    }
+function loadReels() {
+    onValue(ref(db, 'reels'), (snapshot) => {
+        const data = snapshot.val();
+        container.innerHTML = "";
+        if (data) {
+            let reelsList = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            }));
 
-    let reelsList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-    
-    // Heshteg bo'yicha saralash (AI mantiq)
-    const favTag = currentUserData.favHashtag ? currentUserData.favHashtag.toLowerCase() : null;
-    reelsList.sort((a, b) => {
-        const aHasTag = favTag && a.caption && a.caption.toLowerCase().includes(favTag);
-        const bHasTag = favTag && b.caption && b.caption.toLowerCase().includes(favTag);
-        if (aHasTag && !bHasTag) return -1;
-        if (!aHasTag && bHasTag) return 1;
-        return 0; 
-    });
+            // Videolarni random qilish
+            reelsList = shuffleArray(reelsList);
 
-    container.innerHTML = "";
-    
-    for (const reel of reelsList) {
-        const likes = reel.likesCount || 0;
-        let creatorHtml = `@user`;
-        const creatorSnap = await get(ref(db, `users/${reel.userId}`));
-        if (creatorSnap.exists()) {
-            const cData = creatorSnap.val();
-            const badge = cData.isVerified ? `<img src="nishon.png" class="badge-img">` : "";
-            creatorHtml = `@${cData.username || "user"}${badge}`;
+            reelsList.forEach(reel => {
+                createReelElement(reel);
+            });
+            setupVideoObserver();
+        } else {
+            container.innerHTML = '<div style="color:white; text-align:center; margin-top:50vh;">Reelslar topilmadi.</div>';
         }
-
-        const reelHTML = `
-            <div class="reel-video-wrapper" id="reel-${reel.id}">
-                <video class="reel-video" src="${reel.fileUrl || reel.videoUrl}" loop playsinline onclick="window.togglePlay(this)"></video>
-                <div class="reel-actions">
-                    <div class="action-btn" onclick="window.toggleLike('${reel.id}')">
-                        <span class="heart" id="heart-${reel.id}">🤍</span>
-                        <span class="count" id="count-${reel.id}">${likes}</span>
-                    </div>
-                    <div class="action-btn" onclick="window.openComments('${reel.id}')">
-                        <span>💬</span>
-                        <span>Izohlar</span>
-                    </div>
-                </div>
-                <div class="reel-info">
-                    <h3>${creatorHtml}</h3>
-                    <p>${reel.caption || ''}</p>
-                </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', reelHTML);
-        window.checkIfLiked(reel.id);
-    }
-    setupAutoPlay();
+    });
 }
 
-// 3. Avtomatik ijro (IntersectionObserver)
-function setupAutoPlay() {
+function createReelElement(reel) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'reel-video-wrapper';
+    wrapper.dataset.id = reel.id;
+
+    const likedClass = (reel.likes && auth.currentUser && reel.likes[auth.currentUser.uid]) ? 'liked' : '';
+    const likesCount = reel.likes ? Object.keys(reel.likes).length : 0;
+
+    // Foydalanuvchi ma'lumotlarini olish
+    get(ref(db, `users/${reel.userId}`)).then(userSnap => {
+        const userData = userSnap.val() || {};
+        const badge = userData.isVerified ? `<img src="nishon.png" class="badge-img">` : "";
+
+        wrapper.innerHTML = `
+            <video src="${reel.fileUrl}" loop playsinline></video>
+            <div class="reel-actions">
+                <div class="action-btn" onclick="toggleLike('${reel.id}', this)">
+                    <span class="${likedClass}">❤️</span>
+                    <span class="count">${likesCount}</span>
+                </div>
+                <div class="action-btn" onclick="openComments('${reel.id}')">
+                    <span>💬</span>
+                    <span class="count">${reel.comments ? Object.keys(reel.comments).length : 0}</span>
+                </div>
+                <div class="action-btn">
+                    <span>✈️</span>
+                </div>
+            </div>
+            <div class="reel-info">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <img src="${userData.profileImg || 'https://via.placeholder.com/150'}" style="width:35px; height:35px; border-radius:50%; border:1px solid white;">
+                    <b>${userData.username || 'user'}${badge}</b>
+                </div>
+                <p>${reel.caption || ''}</p>
+            </div>
+        `;
+    });
+
+    container.appendChild(wrapper);
+}
+
+function setupVideoObserver() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             const video = entry.target.querySelector('video');
             if (entry.isIntersecting) {
-                video.play().catch(() => {});
+                video.play();
+                currentReelId = entry.target.dataset.id;
             } else {
                 video.pause();
                 video.currentTime = 0;
@@ -102,66 +114,34 @@ function setupAutoPlay() {
         });
     }, { threshold: 0.8 });
 
-    document.querySelectorAll('.reel-video-wrapper').forEach(wrapper => {
-        observer.observe(wrapper);
-    });
+    document.querySelectorAll('.reel-video-wrapper').forEach(el => observer.observe(el));
 }
 
-// --- GLOBAL FUNKSIYALAR (HTML'dan chaqirish uchun window'ga ulaymiz) ---
-
-window.togglePlay = (video) => {
-    if (video.paused) video.play();
-    else video.pause();
-};
-
-window.toggleLike = async (reelId) => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const heart = document.getElementById(`heart-${reelId}`);
-    const countEl = document.getElementById(`count-${reelId}`);
-    const likeRef = ref(db, `reels/${reelId}/likes/${user.uid}`);
-    const countRef = ref(db, `reels/${reelId}/likesCount`);
-
+// Like va Comment funksiyalari window obyektiga biriktiriladi
+window.toggleLike = async (id, btn) => {
+    if (!auth.currentUser) return;
+    const likeRef = ref(db, `reels/${id}/likes/${auth.currentUser.uid}`);
     const snap = await get(likeRef);
-    if (snap.exists()) {
-        // Laykni olib tashlash
-        await set(likeRef, null);
-        await runTransaction(countRef, (current) => (current || 1) - 1);
-        heart.innerText = "🤍";
-        heart.classList.remove('liked');
-        countEl.innerText = parseInt(countEl.innerText) - 1;
-    } else {
-        // Layk bosish
-        await set(likeRef, true);
-        await runTransaction(countRef, (current) => (current || 0) + 1);
-        heart.innerText = "❤️";
-        heart.classList.add('liked');
-        countEl.innerText = parseInt(countEl.innerText) + 1;
-    }
-};
-
-window.checkIfLiked = async (reelId) => {
-    const user = auth.currentUser;
-    if (!user) return;
-    const snap = await get(ref(db, `reels/${reelId}/likes/${user.uid}`));
-    if (snap.exists()) {
-        const heart = document.getElementById(`heart-${reelId}`);
-        if(heart) {
-            heart.innerText = "❤️";
-            heart.classList.add('liked');
-        }
-    }
-};
-
-window.openComments = (reelId) => {
-    currentReelId = reelId;
-    document.getElementById('comment-modal').classList.remove('hidden');
-    const list = document.getElementById('comments-list');
     
-    onValue(ref(db, `reels/${reelId}/comments`), (snap) => {
+    if (snap.exists()) {
+        await set(likeRef, null);
+    } else {
+        await set(likeRef, true);
+    }
+};
+
+window.openComments = (id) => {
+    currentReelId = id;
+    const modal = document.getElementById('comment-modal');
+    modal.classList.remove('hidden');
+    loadComments(id);
+};
+
+function loadComments(id) {
+    const list = document.getElementById('comments-list');
+    onValue(ref(db, `reels/${id}/comments`), (snapshot) => {
+        const data = snapshot.val();
         list.innerHTML = "";
-        const data = snap.val();
         if (data) {
             Object.values(data).forEach(async (c) => {
                 const uSnap = await get(ref(db, `users/${c.uid}`));
@@ -173,15 +153,15 @@ window.openComments = (reelId) => {
                         <img src="${uData.profileImg || 'https://via.placeholder.com/150'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
                         <div>
                             <b>${uData.username || 'user'}${badge}</b>
-                            <p style="margin:2px 0;">${c.text}</p>
+                            <p style="margin:2px 0; color:#333;">${c.text}</p>
                         </div>
                     </div>`;
             });
         } else {
-            list.innerHTML = "Hozircha izohlar yo'q.";
+            list.innerHTML = "<p style='padding:10px;'>Hozircha izohlar yo'q.</p>";
         }
     });
-};
+}
 
 document.getElementById('close-comments').onclick = () => {
     document.getElementById('comment-modal').classList.add('hidden');
@@ -192,10 +172,10 @@ document.getElementById('send-comment').onclick = async () => {
     const text = textInput.value.trim();
     if (!text || !currentReelId || !auth.currentUser) return;
 
-    const commentRef = ref(db, `reels/${currentReelId}/comments`);
-    await push(commentRef, {
-        text: text,
+    const commentRef = push(ref(db, `reels/${currentReelId}/comments`));
+    await set(commentRef, {
         uid: auth.currentUser.uid,
+        text: text,
         timestamp: Date.now()
     });
     textInput.value = "";

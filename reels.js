@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, onValue, update, push, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC4kOm81jDJj7hP22B8oeRKajZhd2DFu7c",
@@ -15,9 +15,8 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const container = document.getElementById('reels-container');
 let currentReelId = null;
-let currentUserData = null;
 
-// Videolarni aralashtirish funksiyasi (Random qilish uchun)
+// Random (tasodifiy) qilish funksiyasi
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -26,57 +25,58 @@ function shuffleArray(array) {
     return array;
 }
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
     if (user) {
-        const userSnap = await get(ref(db, `users/${user.uid}`));
-        currentUserData = userSnap.val() || {};
-        loadReels();
+        loadReelsOnce();
     } else {
-        window.location.href = "index.html";
+        window.location.href = "login.html";
     }
 });
 
-function loadReels() {
-    onValue(ref(db, 'reels'), (snapshot) => {
-        const data = snapshot.val();
-        container.innerHTML = "";
-        if (data) {
-            let reelsList = Object.keys(data).map(key => ({
-                id: key,
-                ...data[key]
-            }));
+// Videolarni bir marta yuklash (Like bosganda sakrab ketmasligi uchun)
+async function loadReelsOnce() {
+    const snapshot = await get(ref(db, 'reels'));
+    const data = snapshot.val();
+    container.innerHTML = "";
 
-            // Videolarni random qilish
-            reelsList = shuffleArray(reelsList);
+    if (data) {
+        let reelsList = Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        }));
 
-            reelsList.forEach(reel => {
-                createReelElement(reel);
-            });
-            setupVideoObserver();
-        } else {
-            container.innerHTML = '<div style="color:white; text-align:center; margin-top:50vh;">Reelslar topilmadi.</div>';
-        }
-    });
+        // Videolarni aralashtirish
+        reelsList = shuffleArray(reelsList);
+
+        reelsList.forEach(reel => {
+            createReelElement(reel);
+        });
+        setupVideoObserver();
+    } else {
+        container.innerHTML = '<div style="color:white; text-align:center; margin-top:50vh;">Reelslar mavjud emas.</div>';
+    }
 }
 
 function createReelElement(reel) {
     const wrapper = document.createElement('div');
     wrapper.className = 'reel-video-wrapper';
+    wrapper.id = `reel-${reel.id}`;
     wrapper.dataset.id = reel.id;
 
-    const likedClass = (reel.likes && auth.currentUser && reel.likes[auth.currentUser.uid]) ? 'liked' : '';
     const likesCount = reel.likes ? Object.keys(reel.likes).length : 0;
+    const isLiked = (reel.likes && auth.currentUser && reel.likes[auth.currentUser.uid]);
+    const likedClass = isLiked ? 'liked' : '';
+    const heartIcon = isLiked ? '❤️' : '🤍';
 
-    // Foydalanuvchi ma'lumotlarini olish
     get(ref(db, `users/${reel.userId}`)).then(userSnap => {
         const userData = userSnap.val() || {};
         const badge = userData.isVerified ? `<img src="nishon.png" class="badge-img">` : "";
 
         wrapper.innerHTML = `
-            <video src="${reel.fileUrl}" loop playsinline></video>
+            <video src="${reel.fileUrl}" loop playsinline onclick="togglePlay(this)"></video>
             <div class="reel-actions">
                 <div class="action-btn" onclick="toggleLike('${reel.id}', this)">
-                    <span class="${likedClass}">❤️</span>
+                    <span class="heart-icon ${likedClass}">${heartIcon}</span>
                     <span class="count">${likesCount}</span>
                 </div>
                 <div class="action-btn" onclick="openComments('${reel.id}')">
@@ -89,7 +89,7 @@ function createReelElement(reel) {
             </div>
             <div class="reel-info">
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                    <img src="${userData.profileImg || 'https://via.placeholder.com/150'}" style="width:35px; height:35px; border-radius:50%; border:1px solid white;">
+                    <img src="${userData.profileImg || 'https://via.placeholder.com/150'}" style="width:35px; height:35px; border-radius:50%; border:1px solid white; object-fit:cover;">
                     <b>${userData.username || 'user'}${badge}</b>
                 </div>
                 <p>${reel.caption || ''}</p>
@@ -100,6 +100,11 @@ function createReelElement(reel) {
     container.appendChild(wrapper);
 }
 
+window.togglePlay = (video) => {
+    if (video.paused) video.play();
+    else video.pause();
+};
+
 function setupVideoObserver() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -109,31 +114,40 @@ function setupVideoObserver() {
                 currentReelId = entry.target.dataset.id;
             } else {
                 video.pause();
-                video.currentTime = 0;
             }
         });
-    }, { threshold: 0.8 });
+    }, { threshold: 0.7 });
 
     document.querySelectorAll('.reel-video-wrapper').forEach(el => observer.observe(el));
 }
 
-// Like va Comment funksiyalari window obyektiga biriktiriladi
+// Like funksiyasi (Sahifa yangilanmasdan ishlaydi)
 window.toggleLike = async (id, btn) => {
     if (!auth.currentUser) return;
     const likeRef = ref(db, `reels/${id}/likes/${auth.currentUser.uid}`);
-    const snap = await get(likeRef);
+    const countEl = btn.querySelector('.count');
+    const heartEl = btn.querySelector('.heart-icon');
     
+    const snap = await get(likeRef);
+    let currentCount = parseInt(countEl.innerText);
+
     if (snap.exists()) {
         await set(likeRef, null);
+        heartEl.innerText = "🤍";
+        heartEl.classList.remove('liked');
+        countEl.innerText = currentCount - 1;
     } else {
         await set(likeRef, true);
+        heartEl.innerText = "❤️";
+        heartEl.classList.add('liked');
+        countEl.innerText = currentCount + 1;
     }
 };
 
+// Comment funksiyalari
 window.openComments = (id) => {
     currentReelId = id;
-    const modal = document.getElementById('comment-modal');
-    modal.classList.remove('hidden');
+    document.getElementById('comment-modal').classList.remove('hidden');
     loadComments(id);
 };
 
@@ -146,19 +160,17 @@ function loadComments(id) {
             Object.values(data).forEach(async (c) => {
                 const uSnap = await get(ref(db, `users/${c.uid}`));
                 const uData = uSnap.val() || {};
-                const badge = uData.isVerified ? `<img src="nishon.png" style="width:12px; margin-left:3px;">` : "";
-                
                 list.innerHTML += `
-                    <div class="comment-item" style="margin-bottom:10px; display:flex; gap:10px;">
+                    <div class="comment-item" style="margin-bottom:12px; display:flex; gap:10px; align-items:start;">
                         <img src="${uData.profileImg || 'https://via.placeholder.com/150'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
                         <div>
-                            <b>${uData.username || 'user'}${badge}</b>
-                            <p style="margin:2px 0; color:#333;">${c.text}</p>
+                            <b style="font-size:13px;">${uData.username || 'user'}</b>
+                            <p style="margin:2px 0; font-size:14px; color:#111;">${c.text}</p>
                         </div>
                     </div>`;
             });
         } else {
-            list.innerHTML = "<p style='padding:10px;'>Hozircha izohlar yo'q.</p>";
+            list.innerHTML = "<p style='text-align:center; color:#888; margin-top:20px;'>Hozircha izohlar yo'q.</p>";
         }
     });
 }

@@ -6,27 +6,16 @@
     <title>STARGRAM - Profil</title>
     <link rel="stylesheet" href="profile.css">
     <style>
-        .badge-img {
-            width: 32px;
-            height: 32px;
-            margin-left: 8px;
-            display: inline-block;
-            vertical-align: middle;
-        }
+        .badge-img { width: 24px; height: 24px; margin-left: 5px; display: inline-block; vertical-align: middle; }
+        #display-username { display: flex; align-items: center; flex-wrap: nowrap; font-size: 18px; font-weight: 600; }
+        .settings-btn { position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer; z-index: 10; }
         
-        #display-username {
-            display: flex;
-            align-items: center;
-            flex-wrap: nowrap;
-        }
-
-        .settings-btn {
-            position: absolute; 
-            top: 20px; 
-            left: 20px; 
-            font-size: 24px; 
-            cursor: pointer; 
-            z-index: 10;
+        /* Yuklanayotgan vaqtdagi effekt */
+        .uploading { 
+            opacity: 0.5; 
+            pointer-events: none; 
+            filter: blur(2px);
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -38,7 +27,7 @@
         <header class="profile-header">
             <div class="avatar-section">
                 <input type="file" id="avatar-input" accept="image/*" hidden>
-                <label for="avatar-input">
+                <label for="avatar-input" style="cursor: pointer; display: inline-block;">
                     <img src="https://via.placeholder.com/150" id="profile-img" alt="Avatar">
                     <div class="change-photo-overlay">O'zgartirish</div>
                 </label>
@@ -46,7 +35,7 @@
             
             <div class="stats-section">
                 <div class="username-row">
-                    <h2 id="display-username">foydalanuvchi</h2>
+                    <h2 id="display-username">yuklanmoqda...</h2>
                     <button id="edit-btn">Tahrirlash</button>
                 </div>
                 <div class="stats-row">
@@ -66,9 +55,7 @@
                 <h3>Profilni tahrirlash</h3>
                 <div class="input-group">
                     <input type="text" id="new-username" placeholder="Yangi username">
-                    <p id="username-error" style="color: #ed4956; font-size: 13px; margin-top: 8px; display: none; font-weight: 500;">
-                        Bu foydalanuvchi nomi band!
-                    </p>
+                    <p id="username-error" style="color: #ed4956; font-size: 13px; margin-top: 8px; display: none;">Bu foydalanuvchi nomi band!</p>
                 </div>
                 <div class="modal-btns">
                     <button id="save-profile">Saqlash</button>

@@ -10,7 +10,7 @@
 
     <div class="settings-container">
         <header class="settings-header">
-            <button onclick="history.back()" class="back-btn">←</button>
+            <button onclick="history.back()\" class="back-btn">←</button>
             <h1>Sozlamalar</h1>
         </header>
 
@@ -20,6 +20,14 @@
         </div>
 
         <div class="settings-list">
+            <div class="settings-item" style="flex-direction: column; align-items: flex-start; gap: 10px; padding: 15px;">
+                <div style="font-weight: 600; font-size: 14px;">Qiziqish (Heshteg)</div>
+                <div style="display: flex; width: 100%; gap: 10px;">
+                    <input type="text" id="hashtag-input" placeholder="#bmw yoki #sport" style="flex: 1; padding: 8px; border: 1px solid #dbdbdb; border-radius: 5px; outline: none;">
+                    <button id="save-hashtag-btn" style="background: #0095f6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: 600;">Saqlash</button>
+                </div>
+            </div>
+
             <div class="settings-item highlight" id="verify-client-btn">
                 <div class="item-info">
                     <span class="icon">✔️</span>

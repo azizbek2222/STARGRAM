@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC4kOm81jDJj7hP22B8oeRKajZhd2DFu7c",
@@ -16,9 +16,9 @@ const db = getDatabase(app);
 
 const usernameEl = document.getElementById('settings-username');
 const profileImgEl = document.getElementById('settings-profile-img');
-const verifyBtn = document.getElementById('verify-client-btn');
+const hashtagInput = document.getElementById('hashtag-input');
+const saveHashtagBtn = document.getElementById('save-hashtag-btn');
 
-// 1. Foydalanuvchi holatini tekshirish
 onAuthStateChanged(auth, (user) => {
     if (user) {
         loadUserData(user.uid);
@@ -27,19 +27,33 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 2. Foydalanuvchi ma'lumotlarini yuklash
 function loadUserData(uid) {
     const userRef = ref(db, 'users/' + uid);
     onValue(userRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             usernameEl.innerText = data.username || "foydalanuvchi";
-            profileImgEl.src = data.profileImg || "https://via.placeholder.com/150";
+            if (data.profileImg) profileImgEl.src = data.profileImg;
+            // Agar foydalanuvchida saqlangan heshteg bo'lsa, inputga yozamiz
+            if (data.favHashtag) {
+                hashtagInput.value = data.favHashtag;
+            }
         }
     });
 }
 
-// 3. Tugma bosilganda mijozni-tasdiqlash.html ga o'tish
-verifyBtn.onclick = () => {
-    window.location.href = "mijozni-tasdiqlash.html";
+// Heshtegni saqlash
+saveHashtagBtn.onclick = async () => {
+    const user = auth.currentUser;
+    const tag = hashtagInput.value.trim();
+    if (user && tag) {
+        await update(ref(db, 'users/' + user.uid), {
+            favHashtag: tag
+        });
+        alert("Qiziqish saqlandi: " + tag);
+    }
+};
+
+document.getElementById('verify-client-btn').onclick = () => {
+    window.location.href = "verify.html";
 };

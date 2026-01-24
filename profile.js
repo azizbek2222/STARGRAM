@@ -36,7 +36,7 @@ onAuthStateChanged(auth, (user) => {
         loadUserPosts();
         loadStats();
     } else {
-        window.location.href = "index.html";
+        window.location.href = "login.html";
     }
 });
 

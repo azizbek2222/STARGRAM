@@ -27,7 +27,7 @@ let currentUser = null;
 // Foydalanuvchini tekshirish
 onAuthStateChanged(auth, (user) => {
     if (user) currentUser = user;
-    else window.location.href = "index.html";
+    else window.location.href = "login.html";
 });
 
 // Video tanlanganda preview qilish

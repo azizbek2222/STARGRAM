@@ -23,7 +23,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         loadUserData(user.uid);
     } else {
-        window.location.href = "index.html";
+        window.location.href = "login.html";
     }
 });
 

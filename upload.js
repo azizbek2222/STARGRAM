@@ -28,7 +28,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
     } else {
-        window.location.href = "index.html";
+        window.location.href = "login.html";
     }
 });
 

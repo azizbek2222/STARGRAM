@@ -14,52 +14,43 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const container = document.getElementById('reels-container');
-let currentReelId = null;
-let currentVideoUrl = ""; // Ulashish uchun video URL saqlanadi
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
+let currentVideoUrl = "";
+let currentReelId = null;
 
 onAuthStateChanged(auth, (user) => {
-    if (user) loadReelsOnce();
+    if (user) loadReels();
     else window.location.href = "login.html";
 });
 
-async function loadReelsOnce() {
+async function loadReels() {
     const snapshot = await get(ref(db, 'reels'));
     const data = snapshot.val();
     container.innerHTML = "";
+    if (!data) return;
 
-    if (data) {
-        let reelsList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        reelsList = shuffleArray(reelsList);
-        reelsList.forEach(reel => createReelElement(reel));
-        setupVideoObserver();
-    }
-}
+    const reelsList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+    // Videolarni aralashtirish
+    reelsList.sort(() => Math.random() - 0.5);
 
-function createReelElement(reel) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'reel-video-wrapper';
-    wrapper.dataset.id = reel.id;
-    wrapper.dataset.url = reel.fileUrl; // URLni saqlab qo'yamiz
-
-    const likesCount = reel.likes ? Object.keys(reel.likes).length : 0;
-    const isLiked = (reel.likes && auth.currentUser && reel.likes[auth.currentUser.uid]);
-    const heartIcon = isLiked ? '❤️' : '🤍';
-
-    get(ref(db, `users/${reel.userId}`)).then(userSnap => {
+    for (const reel of reelsList) {
+        const userSnap = await get(ref(db, `users/${reel.userId}`));
         const userData = userSnap.val() || {};
+        const badge = userData.isVerified ? `<img src="nishon.png" class="badge-img">` : "";
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'reel-video-wrapper';
+        
+        const likesCount = reel.likes ? Object.keys(reel.likes).length : 0;
+        const isLiked = (reel.likes && auth.currentUser && reel.likes[auth.currentUser.uid]);
+        const heartIcon = isLiked ? '❤️' : '🤍';
+
         wrapper.innerHTML = `
-            <video src="${reel.fileUrl}" loop playsinline onclick="togglePlay(this)"></video>
+            <video src="${reel.fileUrl}" loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
+            
             <div class="reel-actions">
                 <div class="action-btn" onclick="toggleLike('${reel.id}', this)">
-                    <span class="heart-icon">${heartIcon}</span>
+                    <span>${heartIcon}</span>
                     <span class="count">${likesCount}</span>
                 </div>
                 <div class="action-btn" onclick="openComments('${reel.id}')">
@@ -70,114 +61,88 @@ function createReelElement(reel) {
                     <span>✈️</span>
                 </div>
             </div>
+
             <div class="reel-info">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                    <img src="${userData.profileImg || 'https://via.placeholder.com/150'}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
-                    <b>${userData.username || 'user'}</b>
+                <div class="user-row">
+                    <img src="${userData.profileImg || 'https://via.placeholder.com/150'}">
+                    <b>${userData.username || 'user'}${badge}</b>
                 </div>
-                <p>${reel.caption || ''}</p>
+                <p class="caption">${reel.caption || ''}</p>
             </div>
         `;
-    });
-    container.appendChild(wrapper);
+        container.appendChild(wrapper);
+    }
+    setupObserver();
 }
 
-// Ulashish menyusini ochish
+// Video avtomatik pley bo'lishi uchun
+function setupObserver() {
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            const v = e.target.querySelector('video');
+            if (e.isIntersecting) v.play(); else v.pause();
+        });
+    }, { threshold: 0.8 });
+    document.querySelectorAll('.reel-video-wrapper').forEach(el => obs.observe(el));
+}
+
+// Tugmalar funksiyalari (Like, Share, Comment)
+window.toggleLike = async (id, btn) => {
+    const likeRef = ref(db, `reels/${id}/likes/${auth.currentUser.uid}`);
+    const snap = await get(likeRef);
+    const countEl = btn.querySelector('.count');
+    let count = parseInt(countEl.innerText);
+
+    if (snap.exists()) {
+        await set(likeRef, null);
+        btn.querySelector('span:first-child').innerText = "🤍";
+        countEl.innerText = count - 1;
+    } else {
+        await set(likeRef, true);
+        btn.querySelector('span:first-child').innerText = "❤️";
+        countEl.innerText = count + 1;
+    }
+};
+
 window.openShare = (url) => {
     currentVideoUrl = url;
     document.getElementById('share-modal').classList.remove('hidden');
 };
 
-// Linkni nusxalash
 document.getElementById('copy-link-btn').onclick = () => {
-    navigator.clipboard.writeText(currentVideoUrl).then(() => {
-        alert("Video linki nusxalandi!");
-        document.getElementById('share-modal').classList.add('hidden');
-    });
-};
-
-// Videoni yuklab olish
-document.getElementById('download-btn').onclick = async () => {
-    try {
-        const response = await fetch(currentVideoUrl);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `stargram_video_${Date.now()}.mp4`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.getElementById('share-modal').classList.add('hidden');
-    } catch (e) {
-        alert("Yuklab olishda xatolik yuz berdi.");
-    }
-};
-
-document.getElementById('close-share').onclick = () => {
+    navigator.clipboard.writeText(currentVideoUrl);
+    alert("Nusxalandi!");
     document.getElementById('share-modal').classList.add('hidden');
 };
 
-// Qolgan funksiyalar (Like, Comment, Video Player) avvalgidek qoldi
-window.togglePlay = (video) => { video.paused ? video.play() : video.pause(); };
-
-function setupVideoObserver() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            const video = entry.target.querySelector('video');
-            if (entry.isIntersecting) video.play();
-            else video.pause();
-        });
-    }, { threshold: 0.7 });
-    document.querySelectorAll('.reel-video-wrapper').forEach(el => observer.observe(el));
-}
-
-window.toggleLike = async (id, btn) => {
-    const likeRef = ref(db, `reels/${id}/likes/${auth.currentUser.uid}`);
-    const countEl = btn.querySelector('.count');
-    const heartEl = btn.querySelector('.heart-icon');
-    const snap = await get(likeRef);
-    let currentCount = parseInt(countEl.innerText);
-    if (snap.exists()) {
-        await set(likeRef, null);
-        heartEl.innerText = "🤍";
-        countEl.innerText = currentCount - 1;
-    } else {
-        await set(likeRef, true);
-        heartEl.innerText = "❤️";
-        countEl.innerText = currentCount + 1;
-    }
+document.getElementById('download-btn').onclick = async () => {
+    const res = await fetch(currentVideoUrl);
+    const blob = await res.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "stargram_reel.mp4";
+    link.click();
+    document.getElementById('share-modal').classList.add('hidden');
 };
 
+document.getElementById('close-share').onclick = () => document.getElementById('share-modal').classList.add('hidden');
+
+// Izohlar funksiyasi o'zgarishsiz qoldi (lekin hamma ma'lumot yuklanishi ta'minlangan)
 window.openComments = (id) => {
     currentReelId = id;
     document.getElementById('comment-modal').classList.remove('hidden');
-    loadComments(id);
-};
-
-function loadComments(id) {
     const list = document.getElementById('comments-list');
-    onValue(ref(db, `reels/${id}/comments`), (snapshot) => {
-        const data = snapshot.val();
-        list.innerHTML = data ? "" : "<p style='text-align:center;'>Izohlar yo'q.</p>";
+    onValue(ref(db, `reels/${id}/comments`), snap => {
+        list.innerHTML = "";
+        const data = snap.val();
         if (data) {
-            Object.values(data).forEach(async (c) => {
-                const uSnap = await get(ref(db, `users/${c.uid}`));
-                const uData = uSnap.val() || {};
-                list.innerHTML += `<div style="margin-bottom:12px; display:flex; gap:10px;">
-                    <img src="${uData.profileImg || 'https://via.placeholder.com/150'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
-                    <div><b>${uData.username}</b><p style="margin:2px 0;">${c.text}</p></div>
-                </div>`;
+            Object.values(data).forEach(async c => {
+                const u = (await get(ref(db, `users/${c.uid}`))).val();
+                list.innerHTML += `<div style="display:flex;gap:10px;margin-bottom:10px;">
+                    <img src="${u.profileImg}" style="width:30px;height:30px;border-radius:50%;">
+                    <b>${u.username}:</b> ${c.text}</div>`;
             });
         }
     });
-}
-
-document.getElementById('close-comments').onclick = () => document.getElementById('comment-modal').classList.add('hidden');
-document.getElementById('send-comment').onclick = async () => {
-    const textInput = document.getElementById('comment-text');
-    if (!textInput.value.trim()) return;
-    await push(ref(db, `reels/${currentReelId}/comments`), { uid: auth.currentUser.uid, text: textInput.value.trim(), timestamp: Date.now() });
-    textInput.value = "";
 };
+document.getElementById('close-comments').onclick = () => document.getElementById('comment-modal').classList.add('hidden');

@@ -25,7 +25,6 @@ const usernameError = document.getElementById('username-error');
 
 let currentUser = null;
 
-// Cloudinary ma'lumotlari - bularni Cloudinary Dashboard'dan tekshiring
 const CLOUD_NAME = "ddpost4ql"; 
 const UPLOAD_PRESET = "stargram_uploads"; 
 
@@ -65,23 +64,38 @@ function loadStats() {
     });
 }
 
+// VIDEOLARNI KO'RSATISH UCHUN TUZATILGAN FUNKSIYA
 function loadUserPosts() {
-    onValue(ref(db, 'reels'), (snapshot) => {
-        const data = snapshot.val();
-        postsContainer.innerHTML = "";
+    const reelsRef = ref(db, 'reels');
+    onValue(reelsRef, (snapshot) => {
+        postsContainer.innerHTML = ""; // Oldingi postlarni tozalash
         let count = 0;
+        const data = snapshot.val();
+
         if (data) {
-            Object.values(data).reverse().forEach(post => {
+            // Postlarni massivga aylantirib, teskari tartibda chiqaramiz (oxirgisi birinchi)
+            const postsArray = Object.values(data).reverse();
+            
+            postsArray.forEach(post => {
                 if (post.userId === currentUser.uid) {
                     count++;
                     const div = document.createElement('div');
                     div.className = 'grid-item';
-                    div.innerHTML = `<video src="${post.fileUrl}"></video>`;
+                    
+                    // Video tegi (playsinline va muted mobil qurilmalarda avtomatik ijro uchun muhim)
+                    div.innerHTML = `
+                        <video src="${post.fileUrl}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>
+                    `;
                     postsContainer.appendChild(div);
                 }
             });
         }
         postCountEl.innerText = count;
+        
+        // Agar postlar bo'lmasa, xabar chiqarish (ixtiyoriy)
+        if (count === 0) {
+            postsContainer.innerHTML = `<p style="grid-column: 1/4; text-align: center; color: #8e8e8e; padding: 20px;">Hali videolar yuklanmagan</p>`;
+        }
     });
 }
 
@@ -110,19 +124,16 @@ document.getElementById('save-profile').onclick = async () => {
     }
 };
 
-// RASM YUKLASH FUNKSIYASI (TUZATILDI)
 document.getElementById('avatar-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file || !currentUser) return;
 
-    // Fayl turini tekshirish
     if (!file.type.startsWith('image/')) {
         alert("Faqat rasm yuklashingiz mumkin!");
         return;
     }
 
     profileImgEl.classList.add('uploading');
-
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
@@ -132,28 +143,18 @@ document.getElementById('avatar-input').addEventListener('change', async (e) => 
             method: 'POST',
             body: formData
         });
-
         const cloudData = await response.json();
-
         if (response.ok && cloudData.secure_url) {
-            // Firebase-da rasm URL-ni yangilash
             await update(ref(db, 'users/' + currentUser.uid), {
                 profileImg: cloudData.secure_url
             });
-            
-            // Interfeysni yangilash
             profileImgEl.src = cloudData.secure_url;
-            alert("Profil rasmi muvaffaqiyatli o'zgartirildi!");
-        } else {
-            console.error("Cloudinary Xatosi:", cloudData);
-            throw new Error(cloudData.error ? cloudData.error.message : "Yuklashda xato yuz berdi");
         }
     } catch (error) {
-        console.error("Xato tafsiloti:", error);
-        alert("Xato: " + error.message + "\n(Cloudinary Settings -> Upload -> Upload presets bo'limida '" + UPLOAD_PRESET + "' Unsigned ekanligini tekshiring)");
+        console.error("Xato:", error);
     } finally {
         profileImgEl.classList.remove('uploading');
-        e.target.value = ""; // Bir xil rasmni qayta tanlash imkoniyati uchun
+        e.target.value = "";
     }
 });
 

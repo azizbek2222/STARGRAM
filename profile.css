@@ -30,3 +30,18 @@ body { margin: 0; font-family: -apple-system, sans-serif; background: #fff; padd
 .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #dbdbdb; }
 .nav-item { text-decoration: none; font-size: 24px; color: black; }
 .nav-item.active { filter: drop-shadow(0 0 2px blue); }
+
+/* ... avvalgi kodlar o'zgarishsiz ... */
+.grid-item { 
+    aspect-ratio: 1/1; 
+    background: #000; /* Videolar yuklanguncha qora fon */
+    overflow: hidden; 
+    position: relative;
+}
+.grid-item video { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    cursor: pointer;
+}
+/* ... qolgan kodlar o'zgarishsiz ... */

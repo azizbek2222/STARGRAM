@@ -72,9 +72,18 @@ function loadUserPosts() {
                 const post = data[key];
                 if (post.userId === currentUser.uid) {
                     count++;
+                    const likesCount = post.likes ? Object.keys(post.likes).length : 0;
+                    const viewsCount = post.views ? Object.keys(post.views).length : 0; // Ko'rishlar soni
+
                     const div = document.createElement('div');
                     div.className = 'grid-item';
-                    div.innerHTML = `<video src="${post.fileUrl}" muted playsinline></video>`;
+                    div.innerHTML = `
+                        <video src="${post.fileUrl}" muted playsinline></video>
+                        <div class="grid-item-overlay">
+                            <span>❤️ ${likesCount}</span>
+                            <span>👁️ ${viewsCount}</span>
+                        </div>
+                    `;
                     div.onclick = () => openFullVideo(key, post);
                     postsContainer.appendChild(div);
                 }
@@ -84,11 +93,15 @@ function loadUserPosts() {
     });
 }
 
-// TO'LIQ EKRANDA OCHISH
 async function openFullVideo(id, post) {
     videoModal.classList.remove('hidden');
     currentReelId = id;
     
+    // Ko'rishlar sonini oshirish (Agar foydalanuvchi birinchi marta ko'rayotgan bo'lsa)
+    if (currentUser) {
+        set(ref(db, `reels/${id}/views/${currentUser.uid}`), true);
+    }
+
     const likesCount = post.likes ? Object.keys(post.likes).length : 0;
     const isLiked = (post.likes && post.likes[currentUser.uid]);
     const heartIcon = isLiked ? '❤️' : '🤍';
@@ -117,12 +130,10 @@ async function openFullVideo(id, post) {
         </div>
     `;
 
-    // Like va Comment tugmalariga hodisa qo'shish
     document.getElementById('like-btn-modal').onclick = () => toggleLike(id);
     document.getElementById('comment-btn-modal').onclick = () => openComments(id);
 }
 
-// LIKE FUNKSIYASI
 async function toggleLike(id) {
     const likeRef = ref(db, `reels/${id}/likes/${currentUser.uid}`);
     const snap = await get(likeRef);
@@ -131,11 +142,8 @@ async function toggleLike(id) {
     } else {
         await set(likeRef, true);
     }
-    // Ma'lumot yangilangach videoni qayta yuklamaslik uchun faqat UI ni yangilash mumkin, 
-    // lekin bizda loadUserPosts hamma narsani kuzatib turibdi.
 }
 
-// COMMENT FUNKSIYALARI (Reels.js bilan bir xil)
 function openComments(id) {
     currentReelId = id;
     document.getElementById('comment-modal').classList.remove('hidden');
@@ -147,13 +155,12 @@ function openComments(id) {
             Object.values(data).forEach(async c => {
                 const uSnap = await get(ref(db, `users/${c.uid}`));
                 const u = uSnap.val() || {};
-                list.innerHTML += `<div class="comment-item"><b>${u.username}:</b> ${c.text}</div>`;
+                list.innerHTML += `<div class="comment-item" style="margin-bottom:8px;"><b>${u.username}:</b> ${c.text}</div>`;
             });
         }
     });
 }
 
-// MODALNI YOPISH
 document.getElementById('close-video-modal').onclick = () => {
     videoModal.classList.add('hidden');
     modalVideoContainer.innerHTML = "";
@@ -172,4 +179,4 @@ document.getElementById('send-comment').onclick = async () => {
     input.value = "";
 };
 
-// ... Edit profil kodlari pastda o'zgarishsiz qoladi ...
+document.getElementById('go-to-settings').onclick = () => { window.location.href = 'settings.html'; };

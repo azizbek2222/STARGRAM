@@ -1,52 +1,60 @@
-body { margin: 0; font-family: -apple-system, sans-serif; background: #fff; padding-bottom: 70px; }
-.profile-container { max-width: 600px; margin: 0 auto; padding: 20px 10px; position: relative; }
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #fff; padding-bottom: 70px; }
+.profile-container { max-width: 600px; margin: 0 auto; padding: 15px; position: relative; }
 
-/* Modalni yashirish uchun MUHIM klass */
+/* 3 ta chiziq tugmasi */
+.settings-btn { position: absolute; top: 15px; right: 20px; font-size: 26px; cursor: pointer; color: #262626; z-index: 5; }
+
+/* Hidden klassi */
 .hidden { display: none !important; }
 
-.profile-header { display: flex; align-items: center; margin-bottom: 20px; }
+/* Profil qismi */
+.profile-header { display: flex; align-items: center; margin-bottom: 20px; margin-top: 30px; }
 .avatar-section { flex: 1; text-align: center; position: relative; }
 .avatar-section img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 1px solid #dbdbdb; }
-.change-photo-overlay { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.4); color: white; font-size: 10px; width: 85px; padding: 2px 0; border-radius: 0 0 42px 42px; pointer-events: none; }
+.change-photo-overlay { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: white; font-size: 10px; width: 85px; padding: 3px 0; border-radius: 0 0 42px 42px; pointer-events: none; }
 
 .stats-section { flex: 2; padding-left: 15px; }
-.username-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.username-row h2 { font-size: 18px; margin: 0; }
-.badge-img { width: 18px; height: 18px; }
+.username-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.username-row h2 { font-size: 20px; font-weight: 300; margin: 0; }
+#edit-btn { padding: 5px 12px; border: 1px solid #dbdbdb; background: #efefef; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
 
-#edit-btn { padding: 6px 12px; border: 1px solid #dbdbdb; background: #efefef; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.stats-row { display: flex; justify-content: space-between; text-align: center; }
+.stat-item { font-size: 13px; }
+.stat-item b { display: block; font-size: 16px; color: #262626; }
 
-.stats-row { display: flex; justify-content: space-between; margin-top: 10px; }
-.stat-item { text-align: center; font-size: 13px; }
-.stat-item b { display: block; font-size: 16px; }
+.profile-bio { padding: 0 10px 15px; font-size: 14px; }
+.profile-tabs { display: flex; border-top: 1px solid #dbdbdb; justify-content: space-around; padding: 12px 0; }
+.tab { font-size: 12px; color: #8e8e8e; letter-spacing: 1px; font-weight: 600; cursor: pointer; }
+.tab.active { color: #262626; border-top: 1px solid #262626; padding-top: 12px; margin-top: -13px; }
 
-.profile-bio { padding: 10px; font-size: 14px; line-height: 1.4; }
-.settings-btn { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; }
-
-/* Grid va Postlar */
-.posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 10px; }
-.grid-item { aspect-ratio: 1/1; background: #000; overflow: hidden; position: relative; cursor: pointer; }
+/* Postlar jadvallari */
+.posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.grid-item { aspect-ratio: 1/1; background: #000; overflow: hidden; position: relative; }
 .grid-item video { width: 100%; height: 100%; object-fit: cover; }
-.grid-item-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center; gap:8px; color:white; font-size:12px; }
 
-/* MODAL - Tahrirlash oynasi uchun CSS */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 5000; display: flex; justify-content: center; align-items: center; }
-.modal-content { background: white; padding: 25px; border-radius: 15px; width: 80%; max-width: 350px; text-align: center; }
-.modal-content h3 { margin-top: 0; margin-bottom: 15px; }
-#new-username { width: 90%; padding: 10px; border: 1px solid #dbdbdb; border-radius: 5px; margin-bottom: 10px; outline: none; }
-.error-text { color: #ed4956; font-size: 12px; margin-bottom: 10px; display: none; }
+/* Videodagi layk va ko'rishlar (Overlay) */
+.grid-item-overlay { 
+    position: absolute; top:0; left:0; width:100%; height:100%; 
+    background: rgba(0,0,0,0.3); display: flex; justify-content: center; 
+    align-items: center; gap: 10px; color: white; font-size: 12px; font-weight: bold;
+}
+
+/* Modallar uslubi */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+.modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 80%; max-width: 340px; text-align: center; }
+#new-username { width: 90%; padding: 10px; border: 1px solid #dbdbdb; border-radius: 6px; margin: 15px 0; outline: none; }
+.error-msg { color: #ed4956; font-size: 12px; display: none; margin-bottom: 10px; }
 .modal-btns { display: flex; gap: 10px; justify-content: center; }
-.modal-btns button { padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
-#save-profile { background: #0095f6; color: white; }
-#close-modal { background: #efefef; }
+.modal-btns button { padding: 8px 16px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+.blue-btn { background: #0095f6; color: #fff; }
+.gray-btn { background: #efefef; color: #262626; }
 
-/* Video Full Modal */
-.video-full-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 6000; }
-.modal-header { position: absolute; top: 0; width: 100%; padding: 15px; z-index: 6100; }
-#close-video-modal { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
-.modal-reels-container { height: 100%; display: flex; align-items: center; }
+/* Full Video Player */
+.video-full-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; }
+.modal-header-nav { position: absolute; top: 0; width: 100%; padding: 15px; z-index: 2100; background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent); }
+#close-video-modal { background: none; border: none; color: white; font-size: 16px; cursor: pointer; }
+.modal-reels-body { height: 100%; display: flex; align-items: center; }
 
 /* Bottom Nav */
-.bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #dbdbdb; z-index: 1000; }
-.nav-item { text-decoration: none; font-size: 24px; color: black; }
-.nav-item.active { color: #000; }
+.bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #dbdbdb; z-index: 100; }
+.nav-item { text-decoration: none; font-size: 24px; color: #262626; }

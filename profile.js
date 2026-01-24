@@ -15,16 +15,8 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 const postsContainer = document.getElementById('profile-posts');
-const postCountEl = document.getElementById('post-count');
-const followerCountEl = document.getElementById('follower-count');
-const followingCountEl = document.getElementById('following-count');
-const usernameEl = document.getElementById('display-username');
-const profileImgEl = document.getElementById('profile-img');
 const editModal = document.getElementById('edit-modal');
-const videoModal = document.getElementById('video-modal');
-
 let currentUser = null;
-let currentReelId = null;
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -37,17 +29,23 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+// 3 ta chiziq tugmasini ishlashi
+document.getElementById('go-to-settings').onclick = () => {
+    window.location.href = 'settings.html';
+};
+
+// Profil ma'lumotlarini yuklash
 function loadUserData() {
     onValue(ref(db, 'users/' + currentUser.uid), (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            const badge = data.isVerified ? `<img src="nishon.png" class="badge-img">` : "";
-            usernameEl.innerHTML = (data.username || "foydalanuvchi") + badge;
-            if (data.profileImg) profileImgEl.src = data.profileImg;
+            document.getElementById('display-username').innerText = data.username || "foydalanuvchi";
+            if (data.profileImg) document.getElementById('profile-img').src = data.profileImg;
         }
     });
 }
 
+// Videolarni yuklash (Layk va Ko'rishlar bilan)
 function loadUserPosts() {
     onValue(ref(db, 'reels'), (snapshot) => {
         postsContainer.innerHTML = "";
@@ -60,12 +58,14 @@ function loadUserPosts() {
                     count++;
                     const likes = post.likes ? Object.keys(post.likes).length : 0;
                     const views = post.views ? Object.keys(post.views).length : 0;
+                    
                     const div = document.createElement('div');
                     div.className = 'grid-item';
                     div.innerHTML = `
                         <video src="${post.fileUrl}" muted playsinline></video>
                         <div class="grid-item-overlay">
-                            <span>❤️ ${likes}</span> <span>👁️ ${views}</span>
+                            <span>❤️ ${likes}</span>
+                            <span>👁️ ${views}</span>
                         </div>
                     `;
                     div.onclick = () => openFullVideo(key, post);
@@ -73,11 +73,11 @@ function loadUserPosts() {
                 }
             });
         }
-        postCountEl.innerText = count;
+        document.getElementById('post-count').innerText = count;
     });
 }
 
-// MODAL BOSHQARUVI
+// Tahrirlash tugmasini ishlashi
 document.getElementById('edit-btn').onclick = () => editModal.classList.remove('hidden');
 document.getElementById('close-modal').onclick = () => {
     editModal.classList.add('hidden');
@@ -87,18 +87,15 @@ document.getElementById('close-modal').onclick = () => {
 document.getElementById('save-profile').onclick = async () => {
     const newName = document.getElementById('new-username').value.trim();
     if (!newName) return;
-    
+
     const usersSnap = await get(ref(db, 'users'));
     const users = usersSnap.val();
-    let isTaken = false;
-    
-    if (users) {
-        Object.keys(users).forEach(uid => {
-            if (uid !== currentUser.uid && users[uid].username === newName) isTaken = true;
-        });
-    }
+    let taken = false;
+    Object.keys(users).forEach(uid => {
+        if (uid !== currentUser.uid && users[uid].username === newName) taken = true;
+    });
 
-    if (isTaken) {
+    if (taken) {
         document.getElementById('username-error').style.display = 'block';
     } else {
         await update(ref(db, 'users/' + currentUser.uid), { username: newName });
@@ -106,5 +103,36 @@ document.getElementById('save-profile').onclick = async () => {
     }
 };
 
-// ... Qolgan loadStats, openFullVideo, toggleLike funksiyalari o'zgarishsiz qoladi ...
-// (Sizda bor bo'lgan reels mantiqi bilan bir xil)
+// Video Full Modal funksiyalari
+function openFullVideo(id, post) {
+    const videoModal = document.getElementById('video-modal');
+    const container = document.getElementById('modal-video-container');
+    videoModal.classList.remove('hidden');
+    
+    // Ko'rishlar sonini oshirish
+    set(ref(db, `reels/${id}/views/${currentUser.uid}`), true);
+
+    container.innerHTML = `
+        <div style="width:100%; position:relative;">
+            <video src="${post.fileUrl}" autoplay loop controls style="width:100%; max-height:100vh;"></video>
+        </div>
+    `;
+}
+
+document.getElementById('close-video-modal').onclick = () => {
+    document.getElementById('video-modal').classList.add('hidden');
+    document.getElementById('modal-video-container').innerHTML = "";
+};
+
+function loadStats() {
+    onValue(ref(db, 'follows'), (snapshot) => {
+        const data = snapshot.val() || {};
+        let f1 = 0; let f2 = 0;
+        Object.values(data).forEach(r => {
+            if (r.to === currentUser.uid) f1++;
+            if (r.from === currentUser.uid) f2++;
+        });
+        document.getElementById('follower-count').innerText = f1;
+        document.getElementById('following-count').innerText = f2;
+    });
+}

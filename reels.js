@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, get, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC4kOm81jDJj7hP22B8oeRKajZhd2DFu7c",
@@ -35,7 +35,7 @@ async function loadReels() {
     for (const reel of reelsList) {
         const userSnap = await get(ref(db, `users/${reel.userId}`));
         const userData = userSnap.val() || {};
-        const badge = userData.isVerified ? `<img src="nishon.png" class="badge-img">` : "";
+        const badge = userData.isVerified ? `<img src="nishon.png" class="badge-img" style="width:14px; margin-left:4px;">` : "";
 
         const wrapper = document.createElement('div');
         wrapper.className = 'reel-video-wrapper';
@@ -62,11 +62,11 @@ async function loadReels() {
             </div>
 
             <div class="reel-info">
-                <div class="user-row">
-                    <img src="${userData.profileImg || 'https://via.placeholder.com/150'}">
-                    <b>${userData.username || 'user'}${badge}</b>
+                <div class="user-row" style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <img src="${userData.profileImg || 'https://via.placeholder.com/150'}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid #fff;">
+                    <b style="color:white; font-size:14px; display:flex; align-items:center;">${userData.username || 'user'}${badge}</b>
                 </div>
-                <p class="caption">${reel.caption || ''}</p>
+                <p class="caption" style="color:white; font-size:14px; margin:0;">${reel.caption || ''}</p>
             </div>
         `;
         container.appendChild(wrapper);
@@ -98,6 +98,23 @@ window.toggleLike = async (id, btn) => {
         await set(likeRef, true);
         btn.querySelector('span:first-child').innerText = "❤️";
         countEl.innerText = count + 1;
+
+        // Monetizatsiya: Layk bosilganda video egasining balansini oshirish
+        get(ref(db, `reels/${id}`)).then(async (reelSnap) => {
+            const reelData = reelSnap.val();
+            const ownerUid = reelData.userId;
+            
+            const ownerSnap = await get(ref(db, `users/${ownerUid}`));
+            const ownerData = ownerSnap.val();
+            
+            if (ownerData && ownerData.isMonetized) {
+                const currentBalance = ownerData.balance || 0;
+                const newBalance = currentBalance + 0.000005; // Har bir layk uchun 0.000005 USDT
+                await update(ref(db, `users/${ownerUid}`), {
+                    balance: newBalance
+                });
+            }
+        });
     }
 };
 
@@ -118,11 +135,11 @@ function loadComments(id) {
                 const uSnap = await get(ref(db, `users/${c.uid}`));
                 const u = uSnap.val() || {};
                 list.innerHTML += `
-                    <div class="comment-item">
-                        <img src="${u.profileImg || 'https://via.placeholder.com/150'}">
+                    <div class="comment-item" style="display:flex; gap:10px; margin-bottom:15px; align-items:flex-start;">
+                        <img src="${u.profileImg || 'https://via.placeholder.com/150'}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
                         <div>
-                            <b>${u.username}</b>
-                            <p>${c.text}</p>
+                            <b style="font-size:13px; color:#333;">${u.username}</b>
+                            <p style="margin:2px 0; font-size:14px; color:#111;">${c.text}</p>
                         </div>
                     </div>`;
             }
@@ -163,9 +180,8 @@ document.getElementById('download-btn').onclick = async () => {
         link.download = `stargram_${Date.now()}.mp4`;
         link.click();
         document.getElementById('share-modal').classList.add('hidden');
-    } catch (e) { alert("Xatolik!"); }
+    } catch (e) { alert("Yuklab olishda xatolik!"); }
 };
 
 document.getElementById('close-share').onclick = () => document.getElementById('share-modal').classList.add('hidden');
 document.getElementById('close-comments').onclick = () => document.getElementById('comment-modal').classList.add('hidden');
-document.getElementById('comment-overlay').onclick = () => document.getElementById('comment-modal').classList.add('hidden');

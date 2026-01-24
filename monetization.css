@@ -1,0 +1,86 @@
+body {
+    margin: 0;
+    font-family: -apple-system, sans-serif;
+    background-color: #fafafa;
+    color: #262626;
+}
+
+.mon-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+}
+
+.mon-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #dbdbdb;
+    gap: 20px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.balance-card {
+    margin: 20px;
+    padding: 30px;
+    background: linear-gradient(135deg, #0095f6, #00376b);
+    color: white;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 149, 246, 0.3);
+}
+
+.balance-card h2 {
+    font-size: 28px;
+    margin: 10px 0;
+}
+
+.requirements-section {
+    padding: 20px;
+}
+
+.req-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.req-item.done {
+    border-left: 5px solid #4caf50;
+}
+
+#activate-mon-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #dbdbdb;
+    color: #8e8e8e;
+}
+
+#activate-mon-btn.active {
+    background: #0095f6;
+    color: white;
+}
+
+.info-card {
+    margin: 20px;
+    padding: 15px;
+    border: 1px dashed #0095f6;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #555;
+}

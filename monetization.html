@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monetizatsiya - STARGRAM</title>
+    <link rel="stylesheet" href="monetization.css">
+</head>
+<body>
+    <div class="mon-container">
+        <header class="mon-header">
+            <button onclick="history.back()" class="back-btn">←</button>
+            <h1>Monetizatsiya</h1>
+        </header>
+
+        <div class="balance-card">
+            <span>Joriy balans</span>
+            <h2 id="user-balance">0.000000 USDT</h2>
+            <p id="mon-status">Holat: Tekshirilmoqda...</p>
+        </div>
+
+        <div class="requirements-section">
+            <h3>Yoqish shartlari:</h3>
+            <div class="req-item" id="req-videos">
+                <span>📹 10 ta video yuklash</span>
+                <b id="video-progress">0/10</b>
+            </div>
+            <div class="req-item" id="req-likes">
+                <span>❤️ Jami 100 ta layk yig'ish</span>
+                <b id="likes-progress">0/100</b>
+            </div>
+            <button id="activate-mon-btn" disabled>Monetizatsiyani yoqish</button>
+        </div>
+
+        <div class="info-card">
+            <h4>Qanday ishlaydi?</h4>
+            <p>Monetizatsiya yoqilgandan so'ng, har bir videongizga bosilgan layk uchun <b>0.000005 USDT</b> miqdorida pul hisoblanadi.</p>
+        </div>
+    </div>
+
+    <script type="module" src="monetization.js"></script>
+</body>
+</html>

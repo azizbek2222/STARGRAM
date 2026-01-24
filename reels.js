@@ -43,21 +43,24 @@ async function loadReels() {
         const likesCount = reel.likes ? Object.keys(reel.likes).length : 0;
         const isLiked = (reel.likes && auth.currentUser && reel.likes[auth.currentUser.uid]);
         const heartIcon = isLiked ? '❤️' : '🤍';
+        const commentCount = reel.comments ? Object.keys(reel.comments).length : 0;
 
+        // HTML strukturasi tuzatildi: tugmalar tartibi va oq fon olib tashlandi
         wrapper.innerHTML = `
             <video src="${reel.fileUrl}" loop playsinline class="reel-video"></video>
             
-            <div class="reel-actions">
-                <div class="action-btn like-btn" data-id="${reel.id}">
-                    <span class="heart-icon">${heartIcon}</span>
-                    <span class="count">${likesCount}</span>
+            <div class="reel-actions" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <div class="action-btn like-btn" data-id="${reel.id}" style="background: none; border: none; cursor: pointer; text-align: center;">
+                    <div style="font-size: 28px;">${heartIcon}</div>
+                    <span class="count" style="color: white; font-size: 12px;">${likesCount}</span>
                 </div>
-                <div class="action-btn comment-btn" data-id="${reel.id}">
-                    <span>💬</span>
-                    <span class="count">${reel.comments ? Object.keys(reel.comments).length : 0}</span>
+                <div class="action-btn comment-btn" data-id="${reel.id}" style="background: none; border: none; cursor: pointer; text-align: center;">
+                    <div style="font-size: 28px;">💬</div>
+                    <span class="count" style="color: white; font-size: 12px;">${commentCount}</span>
                 </div>
-                <div class="action-btn share-btn" data-url="${reel.fileUrl}">
-                    <span>✈️</span>
+                <div class="action-btn share-btn" data-url="${reel.fileUrl}" style="background: none; border: none; cursor: pointer; text-align: center;">
+                    <div style="font-size: 28px;">✈️</div>
+                    <span style="color: white; font-size: 12px;">Ulashish</span>
                 </div>
             </div>
 
@@ -70,7 +73,6 @@ async function loadReels() {
             </div>
         `;
 
-        // Event listenerlarni qo'shish (window. ishlatmasdan xavfsizroq)
         const video = wrapper.querySelector('.reel-video');
         video.onclick = () => video.paused ? video.play() : video.pause();
 
@@ -87,7 +89,11 @@ function setupObserver() {
     const obs = new IntersectionObserver(entries => {
         entries.forEach(e => {
             const v = e.target.querySelector('video');
-            if (e.isIntersecting) v.play(); else v.pause();
+            if (e.isIntersecting) {
+                v.play().catch(() => {}); // Avtoplay xatosini oldini olish
+            } else {
+                v.pause();
+            }
         });
     }, { threshold: 0.8 });
     document.querySelectorAll('.reel-video-wrapper').forEach(el => obs.observe(el));
@@ -99,7 +105,7 @@ async function toggleLike(id, btn) {
     const likeRef = ref(db, `reels/${id}/likes/${uid}`);
     const snap = await get(likeRef);
     const countEl = btn.querySelector('.count');
-    const heartEl = btn.querySelector('.heart-icon');
+    const heartEl = btn.querySelector('div'); // Ikonka div ichida
     let count = parseInt(countEl.innerText);
 
     if (snap.exists()) {
@@ -111,7 +117,6 @@ async function toggleLike(id, btn) {
         heartEl.innerText = "❤️";
         countEl.innerText = count + 1;
 
-        // Monetizatsiya qismi
         const reelSnap = await get(ref(db, `reels/${id}`));
         if (reelSnap.exists()) {
             const ownerUid = reelSnap.val().userId;
@@ -178,7 +183,6 @@ document.getElementById('copy-link-btn').onclick = () => {
     document.getElementById('share-modal').classList.add('hidden');
 };
 
-// YUKLAB OLISH QISMI (TUZATILDI)
 document.getElementById('download-btn').onclick = async () => {
     if (!currentVideoUrl) return;
     try {
@@ -201,7 +205,6 @@ document.getElementById('download-btn').onclick = async () => {
         document.getElementById('share-modal').classList.add('hidden');
     } catch (e) { 
         console.error(e);
-        // Agar xatolik bo'lsa (CORS), videoni yangi oynada ochib beramiz
         window.open(currentVideoUrl, '_blank');
         document.getElementById('share-modal').classList.add('hidden');
     }

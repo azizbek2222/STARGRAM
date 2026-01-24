@@ -16,6 +16,7 @@ const db = getDatabase(app);
 
 const postsContainer = document.getElementById('profile-posts');
 const editModal = document.getElementById('edit-modal');
+const usernameError = document.getElementById('username-error');
 const videoModal = document.getElementById('video-modal');
 const modalVideoContainer = document.getElementById('modal-video-container');
 
@@ -44,6 +45,39 @@ function loadUserData() {
         }
     });
 }
+
+// Usernameni saqlash va bandligini tekshirish
+document.getElementById('save-profile').onclick = async () => {
+    const newName = document.getElementById('new-username').value.trim();
+    if (!newName) return;
+
+    usernameError.style.display = 'none'; // Avval xabarni yashiramiz
+
+    try {
+        const usersSnap = await get(ref(db, 'users'));
+        const users = usersSnap.val();
+        let taken = false;
+
+        if (users) {
+            Object.keys(users).forEach(uid => {
+                // O'zimizdan boshqa foydalanuvchilarda shu ism bormi tekshiramiz
+                if (uid !== currentUser.uid && users[uid].username && users[uid].username.toLowerCase() === newName.toLowerCase()) {
+                    taken = true;
+                }
+            });
+        }
+
+        if (taken) {
+            usernameError.style.display = 'block'; // Agar band bo'lsa xabar chiqadi
+        } else {
+            await update(ref(db, 'users/' + currentUser.uid), { username: newName });
+            editModal.classList.add('hidden');
+            document.getElementById('new-username').value = "";
+        }
+    } catch (error) {
+        console.error("Xatolik:", error);
+    }
+};
 
 function loadUserPosts() {
     onValue(ref(db, 'reels'), (snapshot) => {
@@ -75,12 +109,9 @@ function loadUserPosts() {
     });
 }
 
-// FULL VIDEO MODAL (REELS ELEMENTLARI BILAN)
 async function openFullVideo(id, post) {
     currentReelId = id;
     videoModal.classList.remove('hidden');
-    
-    // Ko'rishni hisoblash
     set(ref(db, `reels/${id}/views/${currentUser.uid}`), true);
 
     const likesCount = post.likes ? Object.keys(post.likes).length : 0;
@@ -93,7 +124,6 @@ async function openFullVideo(id, post) {
     modalVideoContainer.innerHTML = `
         <div class="reel-wrapper-modal">
             <video src="${post.fileUrl}" autoplay loop playsinline onclick="this.paused ? this.play() : this.pause()"></video>
-            
             <div class="reel-actions-modal">
                 <div class="action-btn" id="modal-like-btn">
                     <span class="icon">${heartIcon}</span>
@@ -107,7 +137,6 @@ async function openFullVideo(id, post) {
                     <span class="icon">✈️</span>
                 </div>
             </div>
-
             <div class="reel-info-modal">
                 <div class="user-info">
                     <img src="${userData.profileImg || 'https://via.placeholder.com/150'}" class="mini-avatar">
@@ -148,11 +177,12 @@ function openComments(id) {
     });
 }
 
-document.getElementById('close-video-modal').onclick = () => {
-    videoModal.classList.add('hidden');
-    modalVideoContainer.innerHTML = "";
+document.getElementById('edit-btn').onclick = () => {
+    editModal.classList.remove('hidden');
+    usernameError.style.display = 'none'; // Modal ochilganda xabarni tozalaymiz
 };
-
+document.getElementById('close-modal').onclick = () => editModal.classList.add('hidden');
+document.getElementById('close-video-modal').onclick = () => { videoModal.classList.add('hidden'); modalVideoContainer.innerHTML = ""; };
 document.getElementById('close-comments').onclick = () => document.getElementById('comment-modal').classList.add('hidden');
 
 document.getElementById('send-comment').onclick = async () => {
@@ -164,17 +194,6 @@ document.getElementById('send-comment').onclick = async () => {
         timestamp: Date.now()
     });
     input.value = "";
-};
-
-// Edit Modal logikasi
-document.getElementById('edit-btn').onclick = () => editModal.classList.remove('hidden');
-document.getElementById('close-modal').onclick = () => editModal.classList.add('hidden');
-
-document.getElementById('save-profile').onclick = async () => {
-    const newName = document.getElementById('new-username').value.trim();
-    if (!newName) return;
-    await update(ref(db, 'users/' + currentUser.uid), { username: newName });
-    editModal.classList.add('hidden');
 };
 
 function loadStats() {

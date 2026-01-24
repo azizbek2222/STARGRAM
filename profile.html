@@ -8,9 +8,8 @@
     <style>
         .badge-img { width: 24px; height: 24px; margin-left: 5px; display: inline-block; vertical-align: middle; }
         #display-username { display: flex; align-items: center; flex-wrap: nowrap; font-size: 18px; font-weight: 600; }
-        .settings-btn { position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer; z-index: 10; }
+        .settings-btn { position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer; z-index: 10; color: #000; }
         
-        /* Yuklanayotgan vaqtdagi effekt */
         .uploading { 
             opacity: 0.5; 
             pointer-events: none; 
@@ -70,6 +69,28 @@
         </div>
 
         <div class="posts-grid" id="profile-posts"></div>
+    </div>
+
+    <div id="video-modal" class="video-full-modal hidden">
+        <div class="modal-header">
+            <button id="close-video-modal">⬅ Orqaga</button>
+        </div>
+        <div id="modal-video-container" class="modal-reels-container">
+            </div>
+    </div>
+
+    <div id="comment-modal" class="comment-modal hidden">
+        <div class="comment-content">
+            <div class="comment-header">
+                <span>Izohlar</span>
+                <button id="close-comments">✕</button>
+            </div>
+            <div id="comments-list" class="comments-list"></div>
+            <div class="comment-input-area">
+                <input type="text" id="comment-text" placeholder="Izoh qoldiring...">
+                <button id="send-comment">Yuborish</button>
+            </div>
+        </div>
     </div>
 
     <nav class="bottom-nav">

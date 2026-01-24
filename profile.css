@@ -20,28 +20,49 @@ body { margin: 0; font-family: -apple-system, sans-serif; background: #fff; padd
 .profile-tabs { display: flex; border-top: 1px solid #dbdbdb; justify-content: space-around; padding: 10px 0; }
 .tab { font-size: 12px; color: #8e8e8e; letter-spacing: 1px; cursor: pointer; }
 .tab.active { color: #000; border-top: 1px solid #000; padding-top: 10px; margin-top: -11px; }
+
+/* Grid va Videolar */
 .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
-.grid-item { aspect-ratio: 1/1; background: #eee; overflow: hidden; }
+.grid-item { aspect-ratio: 1/1; background: #000; overflow: hidden; position: relative; cursor: pointer; }
 .grid-item video { width: 100%; height: 100%; object-fit: cover; }
+
+/* Full-screen Video Player Modal */
+.video-full-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #000; z-index: 2000; display: flex; flex-direction: column;
+}
+.video-full-modal.hidden { display: none; }
+.modal-header {
+    padding: 15px; position: absolute; top: 0; width: 100%; z-index: 2100;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+}
+#close-video-modal { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+.modal-reels-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+
+/* Reels elementlari modal ichida */
+.reel-video-wrapper { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.reel-video-wrapper video { max-width: 100%; max-height: 100vh; object-fit: contain; }
+.reel-actions { position: absolute; right: 15px; bottom: 100px; display: flex; flex-direction: column; gap: 20px; color: white; z-index: 10; }
+.action-btn { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+.action-btn span { font-size: 30px; }
+.count { font-size: 13px; font-weight: 600; }
+.reel-info { position: absolute; left: 15px; bottom: 100px; color: white; z-index: 10; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+
+/* Comment Modal */
+.comment-modal { position: fixed; bottom: 0; width: 100%; height: 60%; background: white; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 3000; transition: 0.3s transform ease; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); }
+.comment-modal.hidden { transform: translateY(100%); }
+.comment-content { display: flex; flex-direction: column; height: 100%; }
+.comment-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: bold; }
+#close-comments { border: none; background: none; font-size: 20px; }
+.comments-list { flex: 1; overflow-y: auto; padding: 15px; }
+.comment-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 10px; padding-bottom: 25px; }
+#comment-text { flex: 1; border: 1px solid #dbdbdb; border-radius: 20px; padding: 8px 15px; outline: none; }
+#send-comment { border: none; background: none; color: #0095f6; font-weight: bold; }
+
+/* Navigatsiya */
 .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .modal.hidden { display: none; }
-.modal-content { background: white; padding: 20px; border-radius: 12px; width: 80%; max-width: 400px; text-align: center; }
-.modal-content input { width: 90%; padding: 10px; margin: 15px 0; border: 1px solid #dbdbdb; border-radius: 5px; }
-.bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #dbdbdb; }
+.modal-content { background: white; padding: 20px; border-radius: 12px; width: 85%; max-width: 400px; text-align: center; }
+.bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #dbdbdb; z-index: 100; }
 .nav-item { text-decoration: none; font-size: 24px; color: black; }
 .nav-item.active { filter: drop-shadow(0 0 2px blue); }
-
-/* ... avvalgi kodlar o'zgarishsiz ... */
-.grid-item { 
-    aspect-ratio: 1/1; 
-    background: #000; /* Videolar yuklanguncha qora fon */
-    overflow: hidden; 
-    position: relative;
-}
-.grid-item video { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    cursor: pointer;
-}
-/* ... qolgan kodlar o'zgarishsiz ... */

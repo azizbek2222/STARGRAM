@@ -57,3 +57,8 @@ saveHashtagBtn.onclick = async () => {
 document.getElementById('verify-client-btn').onclick = () => {
     window.location.href = "verify.html";
 };
+
+// settings.js faylining oxiriga qo'shing
+document.getElementById('monetization-btn').onclick = () => {
+    window.location.href = "monetization.html";
+};

@@ -5,18 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STARGRAM - Profil</title>
     <link rel="stylesheet" href="profile.css">
-    <style>
-        .badge-img { width: 24px; height: 24px; margin-left: 5px; display: inline-block; vertical-align: middle; }
-        #display-username { display: flex; align-items: center; flex-wrap: nowrap; font-size: 18px; font-weight: 600; }
-        .settings-btn { position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer; z-index: 10; color: #000; }
-        
-        .uploading { 
-            opacity: 0.5; 
-            pointer-events: none; 
-            filter: blur(2px);
-            transition: all 0.3s ease;
-        }
-    </style>
 </head>
 <body>
 
@@ -26,7 +14,7 @@
         <header class="profile-header">
             <div class="avatar-section">
                 <input type="file" id="avatar-input" accept="image/*" hidden>
-                <label for="avatar-input" style="cursor: pointer; display: inline-block;">
+                <label for="avatar-input">
                     <img src="https://via.placeholder.com/150" id="profile-img" alt="Avatar">
                     <div class="change-photo-overlay">O'zgartirish</div>
                 </label>
@@ -52,10 +40,8 @@
         <div id="edit-modal" class="modal hidden">
             <div class="modal-content">
                 <h3>Profilni tahrirlash</h3>
-                <div class="input-group">
-                    <input type="text" id="new-username" placeholder="Yangi username">
-                    <p id="username-error" style="color: #ed4956; font-size: 13px; margin-top: 8px; display: none;">Bu foydalanuvchi nomi band!</p>
-                </div>
+                <input type="text" id="new-username" placeholder="Yangi username">
+                <p id="username-error" class="error-text">Bu foydalanuvchi nomi band!</p>
                 <div class="modal-btns">
                     <button id="save-profile">Saqlash</button>
                     <button id="close-modal">Yopish</button>
@@ -68,15 +54,15 @@
             <div class="tab">🎬 REELSLAR</div>
         </div>
 
-        <div class="posts-grid" id="profile-posts"></div>
+        <div class="posts-grid" id="profile-posts">
+            </div>
     </div>
 
     <div id="video-modal" class="video-full-modal hidden">
         <div class="modal-header">
             <button id="close-video-modal">⬅ Orqaga</button>
         </div>
-        <div id="modal-video-container" class="modal-reels-container">
-            </div>
+        <div id="modal-video-container" class="modal-reels-container"></div>
     </div>
 
     <div id="comment-modal" class="comment-modal hidden">

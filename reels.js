@@ -29,8 +29,7 @@ async function loadReels() {
     container.innerHTML = "";
     if (!data) return;
 
-    const reelsList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-    // Videolarni aralashtirish
+    let reelsList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
     reelsList.sort(() => Math.random() - 0.5);
 
     for (const reel of reelsList) {
@@ -75,7 +74,6 @@ async function loadReels() {
     setupObserver();
 }
 
-// Video avtomatik pley bo'lishi uchun
 function setupObserver() {
     const obs = new IntersectionObserver(entries => {
         entries.forEach(e => {
@@ -86,7 +84,6 @@ function setupObserver() {
     document.querySelectorAll('.reel-video-wrapper').forEach(el => obs.observe(el));
 }
 
-// Tugmalar funksiyalari (Like, Share, Comment)
 window.toggleLike = async (id, btn) => {
     const likeRef = ref(db, `reels/${id}/likes/${auth.currentUser.uid}`);
     const snap = await get(likeRef);
@@ -104,6 +101,48 @@ window.toggleLike = async (id, btn) => {
     }
 };
 
+window.openComments = (id) => {
+    currentReelId = id;
+    document.getElementById('comment-modal').classList.remove('hidden');
+    loadComments(id);
+};
+
+function loadComments(id) {
+    const list = document.getElementById('comments-list');
+    onValue(ref(db, `reels/${id}/comments`), async (snap) => {
+        list.innerHTML = "";
+        const data = snap.val();
+        if (data) {
+            for (const key in data) {
+                const c = data[key];
+                const uSnap = await get(ref(db, `users/${c.uid}`));
+                const u = uSnap.val() || {};
+                list.innerHTML += `
+                    <div class="comment-item">
+                        <img src="${u.profileImg || 'https://via.placeholder.com/150'}">
+                        <div>
+                            <b>${u.username}</b>
+                            <p>${c.text}</p>
+                        </div>
+                    </div>`;
+            }
+        } else {
+            list.innerHTML = "<p style='text-align:center; color:#888;'>Hozircha izohlar yo'q.</p>";
+        }
+    });
+}
+
+document.getElementById('send-comment').onclick = async () => {
+    const input = document.getElementById('comment-text');
+    if (!input.value.trim()) return;
+    await push(ref(db, `reels/${currentReelId}/comments`), {
+        uid: auth.currentUser.uid,
+        text: input.value.trim(),
+        timestamp: Date.now()
+    });
+    input.value = "";
+};
+
 window.openShare = (url) => {
     currentVideoUrl = url;
     document.getElementById('share-modal').classList.remove('hidden');
@@ -116,33 +155,17 @@ document.getElementById('copy-link-btn').onclick = () => {
 };
 
 document.getElementById('download-btn').onclick = async () => {
-    const res = await fetch(currentVideoUrl);
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = "stargram_reel.mp4";
-    link.click();
-    document.getElementById('share-modal').classList.add('hidden');
+    try {
+        const res = await fetch(currentVideoUrl);
+        const blob = await res.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `stargram_${Date.now()}.mp4`;
+        link.click();
+        document.getElementById('share-modal').classList.add('hidden');
+    } catch (e) { alert("Xatolik!"); }
 };
 
 document.getElementById('close-share').onclick = () => document.getElementById('share-modal').classList.add('hidden');
-
-// Izohlar funksiyasi o'zgarishsiz qoldi (lekin hamma ma'lumot yuklanishi ta'minlangan)
-window.openComments = (id) => {
-    currentReelId = id;
-    document.getElementById('comment-modal').classList.remove('hidden');
-    const list = document.getElementById('comments-list');
-    onValue(ref(db, `reels/${id}/comments`), snap => {
-        list.innerHTML = "";
-        const data = snap.val();
-        if (data) {
-            Object.values(data).forEach(async c => {
-                const u = (await get(ref(db, `users/${c.uid}`))).val();
-                list.innerHTML += `<div style="display:flex;gap:10px;margin-bottom:10px;">
-                    <img src="${u.profileImg}" style="width:30px;height:30px;border-radius:50%;">
-                    <b>${u.username}:</b> ${c.text}</div>`;
-            });
-        }
-    });
-};
 document.getElementById('close-comments').onclick = () => document.getElementById('comment-modal').classList.add('hidden');
+document.getElementById('comment-overlay').onclick = () => document.getElementById('comment-modal').classList.add('hidden');

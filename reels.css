@@ -18,40 +18,61 @@ body, html {
     background: #000;
 }
 
-/* Video markazda va to'liq bo'lishi uchun */
-video { width: 100%; height: 100%; object-fit: cover; }
+/* Video o'lchamini to'g'rilash */
+video { 
+    width: 100%; height: auto; 
+    max-height: 100vh; 
+    object-fit: contain; 
+}
 
 /* O'ng tarafdagi tugmalar */
 .reel-actions { 
-    position: absolute; right: 12px; bottom: 85px; 
+    position: absolute; right: 12px; bottom: 80px; 
     display: flex; flex-direction: column; gap: 18px; 
     z-index: 100; color: white;
 }
 .action-btn { display: flex; flex-direction: column; align-items: center; cursor: pointer; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
 .action-btn span:first-child { font-size: 28px; }
-.count { font-size: 13px; font-weight: 600; margin-top: 2px; }
-.liked { color: #ff3040; }
+.count { font-size: 12px; font-weight: 600; margin-top: 2px; }
 
-/* Pastdagi ma'lumotlar (Username, Caption) */
+/* Pastdagi ma'lumotlar */
 .reel-info { 
-    position: absolute; left: 15px; bottom: 85px; 
-    color: white; z-index: 100; max-width: 80%;
+    position: absolute; left: 15px; bottom: 80px; 
+    color: white; z-index: 100; max-width: 75%;
     text-shadow: 1px 1px 5px rgba(0,0,0,0.8);
 }
 .user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.user-row img { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #fff; object-fit: cover; }
+.user-row img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #fff; object-fit: cover; }
 .user-row b { font-size: 14px; display: flex; align-items: center; gap: 4px; }
-.badge-img { width: 15px; height: 15px; }
-.caption { font-size: 14px; margin: 0; font-weight: 400; }
+.badge-img { width: 14px; height: 14px; }
+.caption { font-size: 14px; margin: 0; font-weight: 400; line-height: 1.3; }
 
-/* Modallar */
-.hidden { display: none !important; }
-.share-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+/* Izohlar (Comment) Modali */
+.comment-modal { position: fixed; inset: 0; z-index: 2000; display: flex; flex-direction: column; justify-content: flex-end; }
+.comment-modal.hidden { display: none; }
+.comment-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
+.comment-content { 
+    position: relative; background: white; 
+    height: 70%; border-top-left-radius: 15px; 
+    border-top-right-radius: 15px; display: flex; flex-direction: column;
+}
+.comment-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: bold; }
+.comments-list { flex: 1; overflow-y: auto; padding: 15px; }
+.comment-item { display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start; }
+.comment-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+.comment-item b { font-size: 13px; color: #333; }
+.comment-item p { margin: 2px 0; font-size: 13.5px; color: #111; }
+.comment-input-area { padding: 10px 15px 30px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+.comment-input-area input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; font-size: 14px; }
+.comment-input-area button { border: none; background: none; color: #0095f6; font-weight: bold; cursor: pointer; }
+
+/* Ulashish Modali */
+.share-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; align-items: center; justify-content: center; }
 .share-content { background: white; width: 80%; border-radius: 12px; overflow: hidden; }
-.share-btn { width: 100%; padding: 15px; border: none; background: #fff; font-size: 15px; border-bottom: 0.5px solid #eee; text-align: left; font-weight: 600; }
-.share-cancel { width: 100%; padding: 15px; border: none; background: #fff; color: #ed4956; font-weight: bold; }
+.share-btn { width: 100%; padding: 15px; border: none; background: #fff; font-size: 15px; border-bottom: 0.5px solid #eee; text-align: left; font-weight: 600; cursor: pointer; }
+.share-cancel { width: 100%; padding: 15px; border: none; background: #fff; color: #ed4956; font-weight: bold; cursor: pointer; }
 
-.comment-modal { position: fixed; bottom: 0; width: 100%; height: 60%; background: white; border-top-left-radius: 15px; border-top-right-radius: 15px; z-index: 1000; }
 .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 50px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 0.5px solid #333; z-index: 500; }
 .nav-item { text-decoration: none; font-size: 24px; color: white; opacity: 0.5; }
 .nav-item.active { opacity: 1; }
+.hidden { display: none !important; }
